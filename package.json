@@ -23,3 +23,9 @@
     "express": "^5.1.0"
   }
 }
+{
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
