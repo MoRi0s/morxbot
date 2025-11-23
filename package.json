@@ -21,9 +21,8 @@
     "discord.js": "^14.25.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
-  }
-}
-{
+  },
+
   "type": "module",
   "engines": {
     "node": ">=18"
