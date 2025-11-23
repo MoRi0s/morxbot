@@ -1,0 +1,25 @@
+{
+  "name": "morxbot",
+  "version": "1.0.0",
+  "description": "iroiro",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MoRi0s/morxbot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MoRi0s/morxbot/issues"
+  },
+  "homepage": "https://github.com/MoRi0s/morxbot#readme",
+  "dependencies": {
+    "discord.js": "^14.25.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}
