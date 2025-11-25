@@ -1,8 +1,5 @@
-// commands/sound.js
 import { SlashCommandBuilder } from "discord.js";
-import { joinVoiceChannel } from "@discordjs/voice";
-
-import { player } from "../utils/audioPlayer.js";
+import { playSound } from "../utils/soundPlayer.js";
 import { jsonDB } from "../utils/jsonStore.js";
 
 export const data = new SlashCommandBuilder()
@@ -16,26 +13,20 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     const url = interaction.options.getString("url");
-    const guildId = interaction.guild.id;
     const member = interaction.member;
+    if (!member.voice.channel) return interaction.reply({ content: "VCに入ってから使って！", ephemeral: true });
 
-    const voice = member.voice.channel;
-    if (!voice) {
-        return interaction.reply({ content: "VC に入ってから使って！", ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
+
+    try {
+        await playSound(member, url, interaction.channel);
+
+        // 履歴保存
+        jsonDB.addSoundHistory(member.guild.id, { url, time: Date.now() });
+
+        await interaction.editReply(`🔊 サウンドを再生開始！\n${url}`);
+    } catch (err) {
+        console.error("sound command error:", err);
+        await interaction.editReply("❌ サウンド再生中にエラーが発生しました");
     }
-
-    joinVoiceChannel({
-        channelId: voice.id,
-        guildId,
-        adapterCreator: interaction.guild.voiceAdapterCreator
-    });
-
-    player.playSound(guildId, url, interaction.channel);
-
-    jsonDB.addSoundHistory(guildId, {
-        url,
-        time: Date.now()
-    });
-
-    return interaction.reply(`🔊 サウンドを再生開始！\n${url}`);
 }

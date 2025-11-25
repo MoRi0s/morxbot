@@ -1,6 +1,6 @@
 // commands/stop.js
 import { SlashCommandBuilder } from "discord.js";
-import { player } from "../utils/audioPlayer.js";
+import { stop } from "../utils/audioPlayer.js"; // playerではなく個別関数をimport
 
 export const data = new SlashCommandBuilder()
     .setName("stop")
@@ -9,7 +9,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     const guildId = interaction.guild.id;
 
-    player.stop(guildId);
+    stop(guildId);
 
     return interaction.reply("⏹️ 再生を停止し、キューをクリアしました。");
 }

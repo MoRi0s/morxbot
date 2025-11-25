@@ -1,6 +1,6 @@
 // commands/resume.js
 import { SlashCommandBuilder } from "discord.js";
-import { player } from "../utils/audioPlayer.js";
+import { resume } from "../utils/audioPlayer.js"; // playerではなく個別関数をimport
 
 export const data = new SlashCommandBuilder()
     .setName("resume")
@@ -9,7 +9,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     const guildId = interaction.guild.id;
 
-    const ok = player.resume(guildId);
+    const ok = resume(guildId);
     if (!ok) {
         return interaction.reply("⛔ 再開できる曲がありません！");
     }

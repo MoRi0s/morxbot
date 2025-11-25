@@ -1,33 +1,18 @@
 // =============================
-//  Audio Player Utility (Full)
+// Audio Player Utility (YouTube / キュー管理)
 // =============================
-
-import {
-  joinVoiceChannel,
-  createAudioPlayer,
-  createAudioResource,
-  AudioPlayerStatus,
-  entersState,
-  VoiceConnectionStatus
-} from "@discordjs/voice";
-
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, entersState, VoiceConnectionStatus } from "@discordjs/voice";
 import ytdl from "@distube/ytdl-core";
 import playDl from "play-dl";
 import fs from "fs";
 
-// =============================
-//   永続化ファイル
-// =============================
 const QUEUE_FILE = "./data/queue.json";
 
-// =============================
-//   メモリ上のデータ
-// =============================
 let queues = {};
 let players = {};
 
 // =============================
-//   JSON読み込み
+// JSON読み込み・保存
 // =============================
 function loadQueue() {
   try {
@@ -41,9 +26,6 @@ function loadQueue() {
 }
 loadQueue();
 
-// =============================
-//   JSON保存
-// =============================
 function saveQueue() {
   try {
     fs.writeFileSync(QUEUE_FILE, JSON.stringify(queues, null, 2));
@@ -53,7 +35,7 @@ function saveQueue() {
 }
 
 // =============================
-//   ギルドのキュー取得
+// ギルドのキュー取得
 // =============================
 function getQueue(guildId) {
   if (!queues[guildId]) queues[guildId] = [];
@@ -61,72 +43,7 @@ function getQueue(guildId) {
 }
 
 // =============================
-// 🔽 次の曲を再生
-// =============================
-async function playNext(guildId) {
-  const queue = getQueue(guildId);
-  const state = players[guildId];
-
-  if (!queue || queue.length === 0) {
-    console.log(`[AudioPlayer] queue empty in ${guildId}`);
-    return;
-  }
-
-  const next = queue[0];
-  let stream;
-
-  try {
-    if (next.type === "yt") {
-      stream = ytdl(next.url, {
-        filter: "audioonly",
-        highWaterMark: 1 << 25
-      });
-    } else if (next.type === "raw") {
-      const s = await playDl.stream(next.url);
-      stream = s.stream;
-    } else {
-      throw new Error("Unknown sound type");
-    }
-
-    state.resource = createAudioResource(stream, { inlineVolume: true });
-    state.resource.volume.setVolume(0.9);
-
-    state.player.play(state.resource);
-    console.log(`[AudioPlayer] Playing: ${next.title} in ${guildId}`);
-
-  } catch (e) {
-    console.error("playNext error:", e);
-    queue.shift();
-    saveQueue();
-    playNext(guildId);
-  }
-}
-
-// =============================
-// 🔽 再生イベント
-// =============================
-function registerPlayerEvents(guildId) {
-  const state = players[guildId];
-  if (!state) return;
-
-  state.player.on(AudioPlayerStatus.Idle, () => {
-    const queue = getQueue(guildId);
-
-    if (queue.length > 0) {
-      queue.shift();
-      saveQueue();
-    }
-
-    playNext(guildId);
-  });
-
-  state.player.on("error", (err) => {
-    console.error("AudioPlayer Error:", err);
-  });
-}
-
-// =============================
-// 🔽 VC参加
+// VC参加
 // =============================
 export async function joinVC(member) {
   const channel = member.voice.channel;
@@ -143,20 +60,62 @@ export async function joinVC(member) {
 }
 
 // =============================
-// 🔽 VC退出
+// 次の曲再生
 // =============================
-export function leaveVC(guildId) {
+async function playNext(guildId) {
+  const queue = getQueue(guildId);
   const state = players[guildId];
-  if (state?.connection) {
-    try {
-      state.connection.destroy();
-    } catch {}
-    delete players[guildId];
+
+  if (!queue || queue.length === 0) return;
+
+  const next = queue[0];
+  let stream;
+
+  try {
+    if (next.type === "yt") {
+      stream = ytdl(next.url, { filter: "audioonly", highWaterMark: 1 << 25 });
+    } else if (next.type === "raw") {
+      const s = await playDl.stream(next.url);
+      stream = s.stream;
+    } else throw new Error("Unknown sound type");
+
+    state.resource = createAudioResource(stream, { inlineVolume: true });
+    state.resource.volume.setVolume(0.9);
+
+    state.player.play(state.resource);
+    console.log(`[AudioPlayer] Playing: ${next.title} in ${guildId}`);
+
+  } catch (e) {
+    console.error("playNext error:", e);
+    queue.shift();
+    saveQueue();
+    playNext(guildId);
   }
 }
 
 // =============================
-// 🔽 キューに追加
+// 再生イベント登録
+// =============================
+function registerPlayerEvents(guildId) {
+  const state = players[guildId];
+  if (!state) return;
+
+  state.player.on(AudioPlayerStatus.Idle, () => {
+    const queue = getQueue(guildId);
+    if (queue.length > 0) {
+      queue.shift();
+      saveQueue();
+    }
+    playNext(guildId);
+  });
+
+  state.player.on("error", (err) => {
+    console.error("AudioPlayer Error:", err);
+  });
+}
+
+// =============================
+// キューに追加
 // =============================
 export async function addToQueue(guildId, item) {
   const q = getQueue(guildId);
@@ -169,21 +128,16 @@ export async function addToQueue(guildId, item) {
     registerPlayerEvents(guildId);
   }
 
-  if (players[guildId].player._state.status === "idle") {
-    playNext(guildId);
-  }
+  if (players[guildId].player._state.status === "idle") playNext(guildId);
 }
 
 // =============================
-// 🔽 キュー取得
+// その他操作
 // =============================
 export function getQueueList(guildId) {
   return getQueue(guildId);
 }
 
-// =============================
-// 🔽 スキップ
-// =============================
 export function skip(guildId) {
   const p = players[guildId]?.player;
   if (!p) return false;
@@ -191,9 +145,6 @@ export function skip(guildId) {
   return true;
 }
 
-// =============================
-// 🔽 停止
-// =============================
 export function stop(guildId) {
   queues[guildId] = [];
   saveQueue();
@@ -201,9 +152,6 @@ export function stop(guildId) {
   if (p) p.stop();
 }
 
-// =============================
-// 🔽 一時停止
-// =============================
 export function pause(guildId) {
   const p = players[guildId]?.player;
   if (!p) return false;
@@ -211,9 +159,6 @@ export function pause(guildId) {
   return true;
 }
 
-// =============================
-// 🔽 再開
-// =============================
 export function resume(guildId) {
   const p = players[guildId]?.player;
   if (!p) return false;
@@ -222,15 +167,12 @@ export function resume(guildId) {
 }
 
 // =============================
-// 🔽 まとめてエクスポート
+// VC退出
 // =============================
-export const player = {
-  joinVC,
-  leaveVC,
-  addToQueue,
-  getQueueList,
-  skip,
-  stop,
-  pause,
-  resume
-};
+export function leaveVC(guildId) {
+  const state = players[guildId];
+  if (state?.connection) {
+    try { state.connection.destroy(); } catch {}
+    delete players[guildId];
+  }
+}
