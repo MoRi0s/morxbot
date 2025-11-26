@@ -3,6 +3,12 @@
 // =============================
 import "dotenv/config";
 
+
+console.log('DISCORD_TOKEN:', process.env.DISCORD_TOKEN);
+console.log('CLIENT_ID:', process.env.CLIENT_ID);
+console.log('GUILD_IDS:', process.env.GUILD_IDS);
+
+
 // main.mjs - Discord Bot Entry Point (Commands + Utils compatible, Windows ESM fixed)
 import fs from "fs";
 import path from "path";
