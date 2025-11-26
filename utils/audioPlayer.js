@@ -1,7 +1,14 @@
 // =============================
 // Audio Player Utility (YouTube / キュー管理)
 // =============================
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, entersState, VoiceConnectionStatus } from "@discordjs/voice";
+import {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus,
+  entersState,
+  VoiceConnectionStatus
+} from "@discordjs/voice";
 import ytdl from "@distube/ytdl-core";
 import playDl from "play-dl";
 import fs from "fs";
@@ -10,6 +17,13 @@ const QUEUE_FILE = "./data/queue.json";
 
 let queues = {};
 let players = {};
+
+// 自動離脱タイマー（15分）
+let leaveTimers = {};
+
+// VC無人チェック用
+let emptyCheckIntervals = {};
+
 
 // =============================
 // JSON読み込み・保存
@@ -42,6 +56,7 @@ function getQueue(guildId) {
   return queues[guildId];
 }
 
+
 // =============================
 // VC参加
 // =============================
@@ -56,8 +71,51 @@ export async function joinVC(member) {
   });
 
   await entersState(connection, VoiceConnectionStatus.Ready, 20_000);
+
+  if (!players[channel.guild.id]) {
+    const player = createAudioPlayer();
+    players[channel.guild.id] = { player, connection, resource: null };
+    registerPlayerEvents(channel.guild.id);
+  } else {
+    players[channel.guild.id].connection = connection;
+  }
+
+  players[channel.guild.id].connection.subscribe(players[channel.guild.id].player);
+
+  startEmptyCheck(channel.guild.id, channel.id);
+
   return connection;
 }
+
+
+
+// =============================
+// VC 無人チェック
+// =============================
+function startEmptyCheck(guildId, channelId) {
+  if (emptyCheckIntervals[guildId]) clearInterval(emptyCheckIntervals[guildId]);
+
+  emptyCheckIntervals[guildId] = setInterval(() => {
+    const state = players[guildId];
+    if (!state || !state.connection) return;
+
+    const guild = state.connection.joinConfig.guildId;
+    const channel = state.connection.joinConfig.channelId;
+    const vc = state.connection.joinConfig.voiceAdapterCreator?.guild?.channels?.cache?.get(channel);
+
+    if (!vc) return;
+
+    // Bot 自身を除いた人数が 0 なら即抜け
+    const humanCount = vc.members.filter(m => !m.user.bot).size;
+
+    if (humanCount === 0) {
+      console.log(`[AudioPlayer] VC empty in ${guildId}, leaving immediately.`);
+      leaveVC(guildId);
+    }
+  }, 5000);
+}
+
+
 
 // =============================
 // 次の曲再生
@@ -83,6 +141,7 @@ async function playNext(guildId) {
     state.resource.volume.setVolume(0.9);
 
     state.player.play(state.resource);
+
     console.log(`[AudioPlayer] Playing: ${next.title} in ${guildId}`);
 
   } catch (e) {
@@ -93,6 +152,8 @@ async function playNext(guildId) {
   }
 }
 
+
+
 // =============================
 // 再生イベント登録
 // =============================
@@ -102,11 +163,22 @@ function registerPlayerEvents(guildId) {
 
   state.player.on(AudioPlayerStatus.Idle, () => {
     const queue = getQueue(guildId);
+
     if (queue.length > 0) {
       queue.shift();
       saveQueue();
+      playNext(guildId);
+      return;
     }
-    playNext(guildId);
+
+    console.log(`[AudioPlayer] Queue finished in ${guildId}. Start 15min auto-leave timer.`);
+
+    if (leaveTimers[guildId]) clearTimeout(leaveTimers[guildId]);
+
+    leaveTimers[guildId] = setTimeout(() => {
+      console.log(`[AudioPlayer] Auto leave after 15min idle in ${guildId}`);
+      leaveVC(guildId);
+    }, 15 * 60 * 1000);
   });
 
   state.player.on("error", (err) => {
@@ -114,10 +186,18 @@ function registerPlayerEvents(guildId) {
   });
 }
 
+
+
 // =============================
 // キューに追加
 // =============================
 export async function addToQueue(guildId, item) {
+
+  if (leaveTimers[guildId]) {
+    clearTimeout(leaveTimers[guildId]);
+    delete leaveTimers[guildId];
+  }
+
   const q = getQueue(guildId);
   q.push(item);
   saveQueue();
@@ -128,8 +208,12 @@ export async function addToQueue(guildId, item) {
     registerPlayerEvents(guildId);
   }
 
-  if (players[guildId].player._state.status === "idle") playNext(guildId);
+  if (players[guildId].player.state.status === "idle") {
+    playNext(guildId);
+  }
 }
+
+
 
 // =============================
 // その他操作
@@ -166,13 +250,29 @@ export function resume(guildId) {
   return true;
 }
 
+
+
 // =============================
 // VC退出
 // =============================
 export function leaveVC(guildId) {
   const state = players[guildId];
+
   if (state?.connection) {
     try { state.connection.destroy(); } catch {}
-    delete players[guildId];
   }
+
+  if (leaveTimers[guildId]) {
+    clearTimeout(leaveTimers[guildId]);
+    delete leaveTimers[guildId];
+  }
+
+  if (emptyCheckIntervals[guildId]) {
+    clearInterval(emptyCheckIntervals[guildId]);
+    delete emptyCheckIntervals[guildId];
+  }
+
+  delete players[guildId];
+
+  console.log(`[AudioPlayer] Left VC in ${guildId}`);
 }

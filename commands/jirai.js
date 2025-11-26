@@ -8,7 +8,9 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
   const channel = interaction.channel;
 
-  // メッセージ1
+  // メッセージ1 
+  await interaction.reply("地雷コマンド");
+
   await channel.send('本当に押していいの？後悔しない？？');
 
   // メッセージ2

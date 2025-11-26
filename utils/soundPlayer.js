@@ -1,15 +1,26 @@
 // =============================
 // Sound Player Utility (効果音 / 単発再生)
 // =============================
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, entersState, VoiceConnectionStatus } from "@discordjs/voice";
+import {
+  joinVoiceChannel,
+  createAudioPlayer,
+  createAudioResource,
+  AudioPlayerStatus,
+  entersState,
+  VoiceConnectionStatus
+} from "@discordjs/voice";
 
 let soundPlayers = {};
+let leaveTimeouts = {};
+
+const ENABLE_VC_EMPTY_CHECK = true; // ← audioPlayer と競合するなら false にする
 
 // =============================
 // 効果音再生
 // =============================
 export async function playSound(member, filePath, channel) {
   const guildId = member.guild.id;
+
   const connection = joinVoiceChannel({
     channelId: member.voice.channel.id,
     guildId,
@@ -21,32 +32,73 @@ export async function playSound(member, filePath, channel) {
   connection.subscribe(player);
   player.play(resource);
 
-  // 2分後に自動切断
+  // 古いデータ削除
   if (soundPlayers[guildId]?.timeout) clearTimeout(soundPlayers[guildId].timeout);
-  soundPlayers[guildId] = { connection, player };
-  soundPlayers[guildId].timeout = setTimeout(() => {
-    player.stop();
-    connection.destroy();
-    delete soundPlayers[guildId];
-  }, 2 * 60 * 1000);
+  if (leaveTimeouts[guildId]) clearTimeout(leaveTimeouts[guildId]);
 
-  // 再生終了で切断
+  soundPlayers[guildId] = { connection, player };
+
+  // =============================
+  // VCに誰もいなくなったら即抜ける
+  // =============================
+  if (ENABLE_VC_EMPTY_CHECK) {
+    const interval = setInterval(() => {
+      const ch = member.guild.channels.cache.get(connection.joinConfig.channelId);
+      if (!ch || ch.members.filter(m => !m.user.bot).size === 0) {
+        cleanup(guildId);
+        clearInterval(interval);
+      }
+    }, 5000);
+    soundPlayers[guildId].vcCheck = interval;
+  }
+
+  // =============================
+  // 再生終了 → 15分後に退出
+  // =============================
   player.on(AudioPlayerStatus.Idle, () => {
-    if (soundPlayers[guildId]) {
-      clearTimeout(soundPlayers[guildId].timeout);
-      connection.destroy();
-      delete soundPlayers[guildId];
-    }
+    scheduleLeave(guildId);
   });
 
+  // =============================
+  // エラー → 即切断
+  // =============================
   player.on("error", (err) => {
     console.error("SoundPlayer error:", err);
-    if (soundPlayers[guildId]) {
-      clearTimeout(soundPlayers[guildId].timeout);
-      connection.destroy();
-      delete soundPlayers[guildId];
-    }
+    cleanup(guildId);
   });
 
-  await entersState(player, AudioPlayerStatus.Playing, 5_000).catch(() => {});
+  await entersState(player, AudioPlayerStatus.Playing, 5000).catch(() => {});
+}
+
+// =============================
+// 15分後に退出
+// =============================
+function scheduleLeave(guildId) {
+  if (leaveTimeouts[guildId]) clearTimeout(leaveTimeouts[guildId]);
+
+  leaveTimeouts[guildId] = setTimeout(() => {
+    cleanup(guildId);
+  }, 15 * 60 * 1000);
+}
+
+// =============================
+// 接続削除処理（統一）
+// =============================
+function cleanup(guildId) {
+  const data = soundPlayers[guildId];
+  if (!data) return;
+
+  const { connection, vcCheck } = data;
+
+  try {
+    if (vcCheck) clearInterval(vcCheck);
+    connection.destroy();
+  } catch (e) {}
+
+  delete soundPlayers[guildId];
+
+  if (leaveTimeouts[guildId]) {
+    clearTimeout(leaveTimeouts[guildId]);
+    delete leaveTimeouts[guildId];
+  }
 }
