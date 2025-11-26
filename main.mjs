@@ -113,15 +113,18 @@ client.on('interactionCreate', async (interaction) => {
     const cmd = client.commands.get(interaction.commandName);
     if (!cmd) return interaction.reply({ content: 'Unknown command', ephemeral: true });
 
-    try {
-      await cmd.execute(interaction, context);
-    } catch (err) {
-      console.error('Command execute error:', err);
-      try {
-        if (interaction.replied || interaction.deferred) await interaction.followUp({ content: '⚠ コマンド実行中にエラーが発生しました', ephemeral: true });
-        else await interaction.reply({ content: '⚠ コマンド実行中にエラーが発生しました', ephemeral: true });
-      } catch (e) { console.error('Reply error', e); }
+   try {
+  await cmd.execute(interaction, context);
+} catch (err) {
+  console.error('Command execute error:', err);
+  try {
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ content: '⚠ コマンド実行中にエラーが発生しました', flags: 64 });
+    } else {
+      await interaction.reply({ content: '⚠ コマンド実行中にエラーが発生しました', flags: 64 });
     }
+  } catch (e) { console.error('Reply error', e); }
+}
   }
 });
 
@@ -130,10 +133,11 @@ client.on('interactionCreate', async (interaction) => {
 // ボタン押下処理（owner-alarm / himajin-call）
 // -------------------------
 client.on("interactionCreate", async (interaction) => {
-if (interaction.isButton()) {
+  if (!interaction.isButton()) return;
+
   const cooldownFile = path.join(context.dataDir, 'alarmCooldown.json');
   const rolesFile = path.join(context.dataDir, 'roles.json');
-  const messagesFile = path.join(context.dataDir, 'himajinMessages.json'); // himajin-call専用
+  const messagesFile = path.join(context.dataDir, 'himajinMessages.json');
 
   const cooldowns = fs.existsSync(cooldownFile) ? JSON.parse(fs.readFileSync(cooldownFile, 'utf8')) : {};
   const rolesData = fs.existsSync(rolesFile) ? JSON.parse(fs.readFileSync(rolesFile, 'utf8')) : {};
@@ -145,7 +149,7 @@ if (interaction.isButton()) {
   const DAY = 24 * 60 * 60 * 1000;
 
   // -------------------------
-  // owner-alarm ボタン
+  // owner-alarm ボタン（変更なし）
   // -------------------------
   if (interaction.customId === `owner-alarm-${guildId}`) {
     const lastUsed = cooldowns[guildId]?.[userId]?.ownerAlarm || 0;
@@ -155,7 +159,6 @@ if (interaction.isButton()) {
       if (!ownerRoleId) {
         await interaction.reply({ content: "⚠ 鯖主ロールが未設定です", ephemeral: true });
       } else {
-        // クールタイム更新
         cooldowns[guildId] = cooldowns[guildId] || {};
         cooldowns[guildId][userId] = cooldowns[guildId][userId] || {};
         cooldowns[guildId][userId].ownerAlarm = now;
@@ -167,17 +170,18 @@ if (interaction.isButton()) {
       const remaining = DAY - (now - lastUsed);
       await interaction.reply({ content: `⏳ クールタイム中です (${Math.ceil(remaining / 1000 / 60 / 60)}時間)`, ephemeral: true });
     }
+    return;
   }
 
   // -------------------------
   // himajin-call ボタン
   // -------------------------
-  else if (interaction.customId.startsWith(`himajin-call-${guildId}-`)) {
+  if (interaction.customId.startsWith(`himajin-call-${guildId}-`)) {
     const MAX_CALLS = 5;
-    const WINDOW = 6 * 60 * 60 * 1000; // 6時間
+    const WINDOW = 6 * 60 * 60 * 1000;
 
     const parts = interaction.customId.split("-");
-    const ownerUserId = parts[2]; // コマンド発行者ID
+    const ownerUserId = parts[2];
 
     cooldowns[guildId] = cooldowns[guildId] || {};
     cooldowns[guildId][userId] = cooldowns[guildId][userId] || {};
@@ -186,49 +190,51 @@ if (interaction.isButton()) {
     const callTimes = userData.himajinCallTimes || [];
     const recentCalls = callTimes.filter(t => now - t < WINDOW);
 
-    if (recentCalls.length < MAX_CALLS) {
-      // タイムスタンプ追加
-      recentCalls.push(now);
-      userData.himajinCallTimes = recentCalls;
-      fs.writeFileSync(cooldownFile, JSON.stringify(cooldowns, null, 2));
+    // まず interaction を ACK（deferUpdate）
+    await interaction.deferUpdate();
 
-      const himajinRoleId = rolesData[guildId]?.himajinRoleId;
-      if (!himajinRoleId) {
-        await interaction.reply({ content: "⚠ 暇人ロールが未設定です", ephemeral: true });
-      } else {
-        // 保存されたメッセージ取得
-        const msg = messagesData[guildId]?.[ownerUserId] || "暇人コールが押されました！";
-
-        const embed = new EmbedBuilder()
-          .setTitle("暇人を呼ぶ魔法のボタン")
-          .setDescription("ボタンを押すと暇人ロールに通知されます")
-          .setColor("Blue");
-
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId(interaction.customId)
-            .setLabel("暇人コール")
-            .setStyle(ButtonStyle.Primary)
-        );
-
-        await interaction.reply({
-          content: `<@&${himajinRoleId}> 🔔 ${msg}`,
-          embeds: [embed],
-          components: [row],
-          ephemeral: false
-        });
-      }
-    } else {
+    // 上限チェック
+    if (recentCalls.length >= MAX_CALLS) {
       const nextAvailable = new Date(Math.min(...recentCalls) + WINDOW);
-      await interaction.reply({
+      return interaction.followUp({
         content: `⏳ 6時間内の呼び出し上限に達しました。次に押せるのは ${nextAvailable.toLocaleString()} です`,
         ephemeral: true
-                });
-            }
-        }
+      });
     }
 
+    // 呼び出し処理
+    recentCalls.push(now);
+    userData.himajinCallTimes = recentCalls;
+    fs.writeFileSync(cooldownFile, JSON.stringify(cooldowns, null, 2));
+
+    const himajinRoleId = rolesData[guildId]?.himajinRoleId;
+    if (!himajinRoleId) return;
+
+    const msg = messagesData[guildId]?.[ownerUserId] || "暇人コールが押されました！";
+
+    const embed = new EmbedBuilder()
+      .setTitle("暇人を呼ぶ魔法のボタン")
+      .setDescription("ボタンを押すと暇人ロールに通知されます")
+      .setColor("Blue");
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(interaction.customId)
+        .setLabel("暇人コール")
+        .setStyle(ButtonStyle.Primary)
+    );
+
+    // 通知メッセージ
+    await interaction.followUp({
+      content: `<@&${himajinRoleId}> 🔔 ${msg}`,
+      embeds: [embed],
+      components: [row],
+      ephemeral: false
+    });
+  }
 });
+
+
 
 
 
