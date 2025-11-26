@@ -65,23 +65,28 @@ for (const file of commandFiles) {
 }
 
 // -------------------------
-// Register slash commands globally
+// Register slash commands per guild (for small number of servers)
 // -------------------------
-if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
-  console.error('DISCORD_TOKEN or CLIENT_ID not set in .env');
+if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID || !process.env.GUILD_IDS) {
+  console.error('DISCORD_TOKEN, CLIENT_ID or GUILD_IDS not set in .env');
   process.exit(1);
 }
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-(async () => {
-  try {
-    console.log(`Registering ${commandsForRegister.length} commands...`);
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commandsForRegister });
-    console.log('✅ Slash commands registered');
-  } catch (e) {
-    console.error('Slash command registration failed:', e);
-  }
-})();
+const guildIds = process.env.GUILD_IDS.split(',').map(g => g.trim());
+
+for (const guildId of guildIds) {
+  (async () => {
+    try {
+      console.log(`Registering ${commandsForRegister.length} commands to guild ${guildId}...`);
+      await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), { body: commandsForRegister });
+      console.log(`✅ Commands registered for guild ${guildId}`);
+    } catch (e) {
+      console.error(`Slash command registration failed for guild ${guildId}:`, e);
+    }
+  })();
+}
+
 
 // -------------------------
 // Context for commands (shared utils)
