@@ -1,9 +1,14 @@
+// =============================
+// Load .env before everything
+// =============================
+import "dotenv/config";
+
 // main.mjs - Discord Bot Entry Point (Commands + Utils compatible, Windows ESM fixed)
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-import dotenv from 'dotenv';
-import express from 'express';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath, pathToFileURL } from "url";
+import express from "express";
+
 import {
   Client,
   GatewayIntentBits,
@@ -11,7 +16,8 @@ import {
   Collection,
   REST,
   Routes
-} from 'discord.js';
+} from "discord.js";
+
 
 dotenv.config();
 
