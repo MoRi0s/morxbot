@@ -24,6 +24,10 @@ let leaveTimers = {};
 // VC無人チェック用
 let emptyCheckIntervals = {};
 
+let queueRepeat = {};       // guildId -> true/false
+let singleRepeat = {};      // guildId -> true/false
+
+
 
 // =============================
 // JSON読み込み・保存
@@ -152,8 +156,6 @@ async function playNext(guildId) {
   }
 }
 
-
-
 // =============================
 // 再生イベント登録
 // =============================
@@ -164,6 +166,24 @@ function registerPlayerEvents(guildId) {
   state.player.on(AudioPlayerStatus.Idle, () => {
     const queue = getQueue(guildId);
 
+    // ------------------------
+    // リピート処理
+    // ------------------------
+    if (singleRepeat[guildId]) {
+      // 同じ曲を繰り返す
+      playNext(guildId);
+      return;
+    }
+
+    if (queueRepeat[guildId]) {
+      // キューの先頭を末尾に回す
+      queue.push(queue.shift());
+      saveQueue();
+      playNext(guildId);
+      return;
+    }
+
+    // 通常処理
     if (queue.length > 0) {
       queue.shift();
       saveQueue();
@@ -185,6 +205,9 @@ function registerPlayerEvents(guildId) {
     console.error("AudioPlayer Error:", err);
   });
 }
+
+
+
 
 
 
@@ -249,6 +272,15 @@ export function resume(guildId) {
   p.unpause();
   return true;
 }
+
+export function enableQueueRepeat(guildId) { queueRepeat[guildId] = true; }
+export function disableQueueRepeat(guildId) { queueRepeat[guildId] = false; }
+export function getQueueRepeatStatus(guildId) { return !!queueRepeat[guildId]; }
+
+export function enableSingleRepeat(guildId) { singleRepeat[guildId] = true; }
+export function disableSingleRepeat(guildId) { singleRepeat[guildId] = false; }
+export function getSingleRepeatStatus(guildId) { return !!singleRepeat[guildId]; }
+
 
 
 
