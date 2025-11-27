@@ -21,8 +21,13 @@ import {
   Partials,
   Collection,
   REST,
-  Routes
-} from "discord.js";
+  Routes,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} from 'discord.js';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -113,19 +118,26 @@ client.on('interactionCreate', async (interaction) => {
     const cmd = client.commands.get(interaction.commandName);
     if (!cmd) return interaction.reply({ content: 'Unknown command', ephemeral: true });
 
-   try {
+try {
   await cmd.execute(interaction, context);
 } catch (err) {
   console.error('Command execute error:', err);
-  try {
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: '⚠ コマンド実行中にエラーが発生しました', flags: 64 });
-    } else {
-      await interaction.reply({ content: '⚠ コマンド実行中にエラーが発生しました', flags: 64 });
+
+  // まだ返信していない場合だけ reply
+  if (!interaction.replied && !interaction.deferred) {
+    try {
+      await interaction.reply({
+        content: '⚠ コマンド実行中にエラーが発生しました',
+        flags: 64
+      });
+    } catch (e) {
+      console.error('Reply error', e);
     }
-  } catch (e) { console.error('Reply error', e); }
-}
   }
+}
+
+
+}
 });
 
 
@@ -171,66 +183,6 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.reply({ content: `⏳ クールタイム中です (${Math.ceil(remaining / 1000 / 60 / 60)}時間)`, ephemeral: true });
     }
     return;
-  }
-
-  // -------------------------
-  // himajin-call ボタン
-  // -------------------------
-  if (interaction.customId.startsWith(`himajin-call-${guildId}-`)) {
-    const MAX_CALLS = 5;
-    const WINDOW = 6 * 60 * 60 * 1000;
-
-    const parts = interaction.customId.split("-");
-    const ownerUserId = parts[2];
-
-    cooldowns[guildId] = cooldowns[guildId] || {};
-    cooldowns[guildId][userId] = cooldowns[guildId][userId] || {};
-    const userData = cooldowns[guildId][userId];
-
-    const callTimes = userData.himajinCallTimes || [];
-    const recentCalls = callTimes.filter(t => now - t < WINDOW);
-
-    // まず interaction を ACK（deferUpdate）
-    await interaction.deferUpdate();
-
-    // 上限チェック
-    if (recentCalls.length >= MAX_CALLS) {
-      const nextAvailable = new Date(Math.min(...recentCalls) + WINDOW);
-      return interaction.followUp({
-        content: `⏳ 6時間内の呼び出し上限に達しました。次に押せるのは ${nextAvailable.toLocaleString()} です`,
-        ephemeral: true
-      });
-    }
-
-    // 呼び出し処理
-    recentCalls.push(now);
-    userData.himajinCallTimes = recentCalls;
-    fs.writeFileSync(cooldownFile, JSON.stringify(cooldowns, null, 2));
-
-    const himajinRoleId = rolesData[guildId]?.himajinRoleId;
-    if (!himajinRoleId) return;
-
-    const msg = messagesData[guildId]?.[ownerUserId] || "暇人コールが押されました！";
-
-    const embed = new EmbedBuilder()
-      .setTitle("暇人を呼ぶ魔法のボタン")
-      .setDescription("ボタンを押すと暇人ロールに通知されます")
-      .setColor("Blue");
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(interaction.customId)
-        .setLabel("暇人コール")
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    // 通知メッセージ
-    await interaction.followUp({
-      content: `<@&${himajinRoleId}> 🔔 ${msg}`,
-      embeds: [embed],
-      components: [row],
-      ephemeral: false
-    });
   }
 });
 
