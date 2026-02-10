@@ -144,7 +144,14 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     const aki = JSON.parse(fs.readFileSync(akiFile, "utf8"));
-    const [, stateId, answer] = interaction.customId.split(":");
+    const [, stateId, answer, ownerId] = interaction.customId.split(":");
+
+  if (interaction.user.id !== ownerId) {
+    return interaction.reply({
+      content: "⛔ これは他の人のアキネーターです",
+      flags: 64
+    });
+  }
 
     /* === 確認 YES === */
     if (stateId === "confirm" && answer === "yes") {
@@ -175,7 +182,7 @@ client.on("interactionCreate", async (interaction) => {
           new ButtonBuilder()
             .setLabel(label)
             .setStyle(ButtonStyle.Primary)
-            .setCustomId(`iphoneaki:${start}:${label}`)
+            .setCustomId(`iphoneaki:${start}:${label}:${ownerId}`)
         );
       }
 
@@ -193,30 +200,39 @@ client.on("interactionCreate", async (interaction) => {
         components: []
       });
     }
+    
+const template =
+  aki.confirmMessages[
+    Math.floor(Math.random() * aki.confirmMessages.length)
+  ];
 
-    /* === 結果 → 確認フェーズ === */
-    if (typeof next === "object" && next.result) {
-      const embed = new EmbedBuilder()
-        .setTitle("📱 判定結果")
-        .setDescription(`あなたのiPhoneは **${next.result}** ですか？`)
-        .setColor(0xffcc00);
+const message = template.replace("{result}", next.result);
 
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("はい")
-          .setStyle(ButtonStyle.Success)
-          .setCustomId("iphoneaki:confirm:yes"),
-        new ButtonBuilder()
-          .setLabel("いいえ")
-          .setStyle(ButtonStyle.Danger)
-          .setCustomId("iphoneaki:confirm:no")
-      );
+/* === 結果 → 確認フェーズ === */
+if (typeof next === "object" && next.result) {
+  const embed = new EmbedBuilder()
+    .setTitle("📱 判定結果")
+    .setDescription(message)
+    .setColor(0xffcc00);
 
-      return interaction.update({
-        embeds: [embed],
-        components: [row]
-      });
-    }
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel("はい")
+      .setStyle(ButtonStyle.Success)
+      .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
+
+    new ButtonBuilder()
+      .setLabel("いいえ")
+      .setStyle(ButtonStyle.Danger)
+      .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
+  );
+
+  return interaction.update({
+    embeds: [embed],
+    components: [row]
+  });
+}
+
 
     /* === 次の質問 === */
     const nextState = aki.states[next];
@@ -231,7 +247,7 @@ client.on("interactionCreate", async (interaction) => {
         new ButtonBuilder()
           .setLabel(label)
           .setStyle(ButtonStyle.Primary)
-          .setCustomId(`iphoneaki:${next}:${label}`)
+          .setCustomId(`iphoneaki:${next}:${label}:${ownerId}`)
       );
     }
 

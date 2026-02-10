@@ -30,12 +30,13 @@ export async function execute(interaction, context) {
     .setColor(0x0099ff);
 
   const row = new ActionRowBuilder();
+  const ownerId = interaction.user.id;
   for (const label of Object.keys(startState.options)) {
     row.addComponents(
       new ButtonBuilder()
         .setLabel(label)
         .setStyle(ButtonStyle.Primary)
-        .setCustomId(`iphoneaki:${aki.start}:${label}`)
+        .setCustomId(`iphoneaki:${aki.start}:${label}:${ownerId}`)
     );
   }
 
