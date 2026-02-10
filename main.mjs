@@ -191,33 +191,56 @@ client.on("interactionCreate", async (interaction) => {
   });
 }
 
+/* === 確認 NO → 最初に戻す === */
+if (stateId === "confirm" && answer === "no") {
+  const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
-    /* === 確認 NO → 最初に戻す === */
-    if (stateId === "confirm" && answer === "no") {
-      rankData.users[userId].play += 1;
-      const start = aki.start;
-      const startState = aki.states[start];
+  let rankData = { users: {} };
+  if (fs.existsSync(rankFile)) {
+    rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
+  }
 
-      const embed = new EmbedBuilder()
-        .setTitle("📱 iPhoneアキネーター")
-        .setDescription(startState.question)
-        .setColor(0x0099ff);
+  const userId = interaction.user.id;
+  const username = interaction.user.username;
 
-      const row = new ActionRowBuilder();
-      for (const label of Object.keys(startState.options)) {
-        row.addComponents(
-          new ButtonBuilder()
-            .setLabel(label)
-            .setStyle(ButtonStyle.Primary)
-            .setCustomId(`iphoneaki:${start}:${label}:${ownerId}`)
-        );
-      }
+  if (!rankData.users[userId]) {
+    rankData.users[userId] = {
+      name: username,
+      play: 0,
+      win: 0
+    };
+  }
 
-      return interaction.update({
-        embeds: [embed],
-        components: [row]
-      });
-    }
+  // ❗ play だけ増やす
+  rankData.users[userId].play += 1;
+
+  fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
+
+  const start = aki.start;
+  const startState = aki.states[start];
+
+  const embed = new EmbedBuilder()
+    .setTitle("📱 iPhoneアキネーター")
+    .setDescription(startState.question)
+    .setColor(0x0099ff);
+
+  const row = new ActionRowBuilder();
+  for (const label of Object.keys(startState.options)) {
+    row.addComponents(
+      new ButtonBuilder()
+        .setLabel(label)
+        .setStyle(ButtonStyle.Primary)
+        .setCustomId(`iphoneaki:${start}:${label}:${ownerId}`)
+    );
+  }
+
+  return interaction.update({
+    embeds: [embed],
+    components: [row]
+  });
+}
+
+
 
     const state = aki.states[stateId];
     const next = state?.options?.[answer];
