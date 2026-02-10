@@ -154,29 +154,21 @@ client.on("interactionCreate", async (interaction) => {
   }
 
 /* === 確認 YES === */
-  if (stateId === "confirm" && answer === "yes") {
+if (stateId === "confirm" && answer === "yes") {
   const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
-  // 初期化
-  let rankData = { users: {} };
+  let rankData = { models: {} };
   if (fs.existsSync(rankFile)) {
     rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
   }
 
-  const userId = interaction.user.id;
-  const username = interaction.user.username;
+  const model = next.result; // ← 判定された iPhone 機種
 
-  if (!rankData.users[userId]) {
-    rankData.users[userId] = {
-      name: username,
-      play: 0,
-      win: 0
-    };
+  if (!rankData.models[model]) {
+    rankData.models[model] = 0;
   }
 
-  // 成績更新
-  rankData.users[userId].play += 1;
-  rankData.users[userId].win += 1;
+  rankData.models[model] += 1;
 
   fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
@@ -190,6 +182,7 @@ client.on("interactionCreate", async (interaction) => {
     components: []
   });
 }
+
 
 /* === 確認 NO → 最初に戻す === */
 if (stateId === "confirm" && answer === "no") {
