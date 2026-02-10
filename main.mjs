@@ -156,8 +156,8 @@ client.on("interactionCreate", async (interaction) => {
     /* === 確認 YES === */
     if (stateId === "confirm" && answer === "yes") {
       const embed = new EmbedBuilder()
-        .setTitle("🎉 やった！")
-        .setDescription("正解できてよかった！")
+        .setTitle("🎉 やったー！😊")
+        .setDescription("( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！")
         .setColor(0x00ff00);
 
       return interaction.update({
@@ -200,7 +200,7 @@ client.on("interactionCreate", async (interaction) => {
         components: []
       });
     }
-    
+
 const template =
   aki.confirmMessages[
     Math.floor(Math.random() * aki.confirmMessages.length)

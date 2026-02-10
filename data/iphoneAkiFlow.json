@@ -183,7 +183,7 @@
       }
     },
     "iphone11orxx": {
-      "question": "フラッシュが縦に並んでいる２つのレンズの中央横？",
+      "question": "フラッシュの位置は縦に並んでいる２つのレンズの右側？",
       "options": {
         "はい": { "result": "iPhone 11" },
         "いいえ": "xs_check"
@@ -238,7 +238,7 @@
       }
     },
 
-        "cam_control2": {
+    "cam_control2": {
       "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
       "options": {
         "はい": "mobiledataesim",
@@ -246,7 +246,7 @@
       }
     },
 
-            "mobiledataesim": {
+    "mobiledataesim": {
       "question": "日本版はeSIMのみ対応で、モバイルデータ通信のときに5G+と表示される？",
       "options": {
         "はい": { "result" : "iPhone 17" },
