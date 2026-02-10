@@ -37,11 +37,16 @@ export async function execute(interaction, context) {
     })
     .join("\n\n");
 
-  const embed = new EmbedBuilder()
-    .setTitle("📱 iPhone 機種別ランキング")
-    .setDescription(description)
-    .setColor(0x00bfff)
-    .setFooter({ text: "的中回数が多い順" });
+const totalPlay = rankData.totalPlay ?? 0;
+
+const embed = new EmbedBuilder()
+  .setTitle("📱 iPhone 機種別ランキング")
+  .setDescription(description)
+  .setColor(0x00bfff)
+  .setFooter({
+    text: `総プレイ回数: ${totalPlay} 回`
+  });
+
 
   await interaction.reply({
     embeds: [embed]
