@@ -153,22 +153,21 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-/* === 確認 YES === */
+/* === 確認 YES（的中） === */
 if (stateId === "confirm" && answer === "yes") {
   const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
-  let rankData = { models: {} };
+  let rankData = { totalPlay: 0, models: {} };
   if (fs.existsSync(rankFile)) {
     rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
   }
 
-  const model = next.result; // ← 判定された iPhone 機種
+  // 総プレイ回数を増やす
+  rankData.totalPlay += 1;
 
-  if (!rankData.models[model]) {
-    rankData.models[model] = 0;
-  }
-
-  rankData.models[model] += 1;
+  // 的中した機種
+  const model = next.result;
+  rankData.models[model] = (rankData.models[model] ?? 0) + 1;
 
   fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
@@ -183,29 +182,17 @@ if (stateId === "confirm" && answer === "yes") {
   });
 }
 
-
-/* === 確認 NO → 最初に戻す === */
+/* === 確認 NO → 最初に戻す（外れ） === */
 if (stateId === "confirm" && answer === "no") {
   const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
-  let rankData = { users: {} };
+  let rankData = { totalPlay: 0, models: {} };
   if (fs.existsSync(rankFile)) {
     rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
   }
 
-  const userId = interaction.user.id;
-  const username = interaction.user.username;
-
-  if (!rankData.users[userId]) {
-    rankData.users[userId] = {
-      name: username,
-      play: 0,
-      win: 0
-    };
-  }
-
-  // ❗ play だけ増やす
-  rankData.users[userId].play += 1;
+  // ❗ 外れてもプレイ回数は増やす
+  rankData.totalPlay += 1;
 
   fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
@@ -232,6 +219,7 @@ if (stateId === "confirm" && answer === "no") {
     components: [row]
   });
 }
+
 
 
 
