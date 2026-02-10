@@ -124,7 +124,7 @@ client.on("interactionCreate", async (interaction) => {
     } catch (err) {
   console.error("❌ Command execute error:", err);
   // ❗ ここでは絶対に reply しない
-}
+  }
     return;
   }
 
@@ -134,7 +134,7 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton()) return;
 
   /* ===== iPhone Akinator ===== */
-if (interaction.customId.startsWith("iphoneaki:")) {
+  if (interaction.customId.startsWith("iphoneaki:")) {
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
     return interaction.update({
@@ -287,7 +287,8 @@ if (interaction.customId.startsWith("iphoneaki:")) {
     embeds: [embed],
     components: [row]
   });
-}
+  
+}}) // End of iphoneaki button handler
 
 
 // -------------------------
