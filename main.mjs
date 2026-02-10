@@ -153,21 +153,48 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-    /* === 確認 YES === */
-    if (stateId === "confirm" && answer === "yes") {
-      const embed = new EmbedBuilder()
-        .setTitle("🎉 やったー！😊")
-        .setDescription("( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！")
-        .setColor(0x00ff00);
+/* === 確認 YES === */
+  if (stateId === "confirm" && answer === "yes") {
+  const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
-      return interaction.update({
-        embeds: [embed],
-        components: []
-      });
-    }
+  // 初期化
+  let rankData = { users: {} };
+  if (fs.existsSync(rankFile)) {
+    rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
+  }
+
+  const userId = interaction.user.id;
+  const username = interaction.user.username;
+
+  if (!rankData.users[userId]) {
+    rankData.users[userId] = {
+      name: username,
+      play: 0,
+      win: 0
+    };
+  }
+
+  // 成績更新
+  rankData.users[userId].play += 1;
+  rankData.users[userId].win += 1;
+
+  fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
+
+  const embed = new EmbedBuilder()
+    .setTitle("🎉 やったー！😊")
+    .setDescription("( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！")
+    .setColor(0x00ff00);
+
+  return interaction.update({
+    embeds: [embed],
+    components: []
+  });
+}
+
 
     /* === 確認 NO → 最初に戻す === */
     if (stateId === "confirm" && answer === "no") {
+      rankData.users[userId].play += 1;
       const start = aki.start;
       const startState = aki.states[start];
 
