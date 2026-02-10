@@ -110,79 +110,135 @@ const context = {
 // Ensure data dir exists
 if (!fs.existsSync(context.dataDir)) fs.mkdirSync(context.dataDir, { recursive: true });
 
-// -------------------------
-// Interaction dispatcher
-// -------------------------
-client.on('interactionCreate', async (interaction) => {
-  if (interaction.isChatInputCommand()) {
-    const cmd = client.commands.get(interaction.commandName);
-    if (!cmd) return interaction.reply({ content: 'Unknown command', ephemeral: true });
-
-try {
-  await cmd.execute(interaction, context);
-} catch (err) {
-  console.error('Command execute error:', err);
-
-  // まだ返信していない場合だけ reply
-  if (!interaction.replied && !interaction.deferred) {
-    try {
-      await interaction.reply({
-        content: '⚠ コマンド実行中にエラーが発生しました',
-        flags: 64
-      });
-    } catch (e) {
-      console.error('Reply error', e);
-    }
-  }
-}
-
-
-}
-});
-
-
-// -------------------------
-// ボタン押下処理（owner-alarm / himajin-call）
-// -------------------------
 client.on("interactionCreate", async (interaction) => {
+
+  /* =============================
+   * Slash Commands
+   * ============================= */
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
+
+    try {
+      await command.execute(interaction, context);
+    } catch (err) {
+  console.error("❌ Command execute error:", err);
+  // ❗ ここでは絶対に reply しない
+}
+    return;
+  }
+
+  /* =============================
+   * Buttons
+   * ============================= */
   if (!interaction.isButton()) return;
 
-  const cooldownFile = path.join(context.dataDir, 'alarmCooldown.json');
-  const rolesFile = path.join(context.dataDir, 'roles.json');
-  const messagesFile = path.join(context.dataDir, 'himajinMessages.json');
-
-  const cooldowns = fs.existsSync(cooldownFile) ? JSON.parse(fs.readFileSync(cooldownFile, 'utf8')) : {};
-  const rolesData = fs.existsSync(rolesFile) ? JSON.parse(fs.readFileSync(rolesFile, 'utf8')) : {};
-  const messagesData = fs.existsSync(messagesFile) ? JSON.parse(fs.readFileSync(messagesFile, 'utf8')) : {};
-
-  const guildId = interaction.guild.id;
-  const userId = interaction.user.id;
-  const now = Date.now();
-  const DAY = 24 * 60 * 60 * 1000;
-
-  // -------------------------
-  // owner-alarm ボタン（変更なし）
-  // -------------------------
-  if (interaction.customId === `owner-alarm-${guildId}`) {
-    const lastUsed = cooldowns[guildId]?.[userId]?.ownerAlarm || 0;
-
-    if (now - lastUsed >= DAY) {
-      const ownerRoleId = rolesData[guildId]?.ownerRoleId;
-      if (!ownerRoleId) {
-        await interaction.reply({ content: "⚠ 鯖主ロールが未設定です", ephemeral: true });
-      } else {
-        cooldowns[guildId] = cooldowns[guildId] || {};
-        cooldowns[guildId][userId] = cooldowns[guildId][userId] || {};
-        cooldowns[guildId][userId].ownerAlarm = now;
-        fs.writeFileSync(cooldownFile, JSON.stringify(cooldowns, null, 2));
-
-        await interaction.reply({ content: `<@&${ownerRoleId}> 鯖主かもーん`, ephemeral: false });
-      }
-    } else {
-      const remaining = DAY - (now - lastUsed);
-      await interaction.reply({ content: `⏳ クールタイム中です (${Math.ceil(remaining / 1000 / 60 / 60)}時間)`, ephemeral: true });
+  /* ===== iPhone Akinator ===== */
+  if (interaction.customId.startsWith("iphoneaki:")) {
+    const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
+    if (!fs.existsSync(akiFile)) {
+      return interaction.update({
+        content: "❌ アキネーターデータが見つかりません",
+        components: []
+      });
     }
-    return;
+
+    const aki = JSON.parse(fs.readFileSync(akiFile, "utf8"));
+    const [, stateId, answer] = interaction.customId.split(":");
+
+    /* === 確認 YES === */
+    if (stateId === "confirm" && answer === "yes") {
+      const embed = new EmbedBuilder()
+        .setTitle("🎉 やった！")
+        .setDescription("正解できてよかった！")
+        .setColor(0x00ff00);
+
+      return interaction.update({
+        embeds: [embed],
+        components: []
+      });
+    }
+
+    /* === 確認 NO → 最初に戻す === */
+    if (stateId === "confirm" && answer === "no") {
+      const start = aki.start;
+      const startState = aki.states[start];
+
+      const embed = new EmbedBuilder()
+        .setTitle("📱 iPhoneアキネーター")
+        .setDescription(startState.question)
+        .setColor(0x0099ff);
+
+      const row = new ActionRowBuilder();
+      for (const label of Object.keys(startState.options)) {
+        row.addComponents(
+          new ButtonBuilder()
+            .setLabel(label)
+            .setStyle(ButtonStyle.Primary)
+            .setCustomId(`iphoneaki:${start}:${label}`)
+        );
+      }
+
+      return interaction.update({
+        embeds: [embed],
+        components: [row]
+      });
+    }
+
+    const state = aki.states[stateId];
+    const next = state?.options?.[answer];
+    if (!next) {
+      return interaction.update({
+        content: "❌ 次の状態が見つかりません",
+        components: []
+      });
+    }
+
+    /* === 結果 → 確認フェーズ === */
+    if (typeof next === "object" && next.result) {
+      const embed = new EmbedBuilder()
+        .setTitle("📱 判定結果")
+        .setDescription(`あなたのiPhoneは **${next.result}** ですか？`)
+        .setColor(0xffcc00);
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setLabel("はい")
+          .setStyle(ButtonStyle.Success)
+          .setCustomId("iphoneaki:confirm:yes"),
+        new ButtonBuilder()
+          .setLabel("いいえ")
+          .setStyle(ButtonStyle.Danger)
+          .setCustomId("iphoneaki:confirm:no")
+      );
+
+      return interaction.update({
+        embeds: [embed],
+        components: [row]
+      });
+    }
+
+    /* === 次の質問 === */
+    const nextState = aki.states[next];
+    const embed = new EmbedBuilder()
+      .setTitle("📱 iPhoneアキネーター")
+      .setDescription(nextState.question)
+      .setColor(0x0099ff);
+
+    const row = new ActionRowBuilder();
+    for (const label of Object.keys(nextState.options)) {
+      row.addComponents(
+        new ButtonBuilder()
+          .setLabel(label)
+          .setStyle(ButtonStyle.Primary)
+          .setCustomId(`iphoneaki:${next}:${label}`)
+      );
+    }
+
+    return interaction.update({
+      embeds: [embed],
+      components: [row]
+    });
   }
 });
 

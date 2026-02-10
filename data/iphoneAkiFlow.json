@@ -1,0 +1,196 @@
+{
+  "start": "home_button",
+  "states": {
+    "home_button": {
+      "question": "ホームボタンはある？",
+      "options": {
+        "はい": "power_top",
+        "いいえ": "curved_side"
+      }
+    },
+
+    "power_top": {
+      "question": "電源ボタンが上部にある？",
+      "options": {
+        "はい": "touch_id",
+        "いいえ": "glass_back"
+      }
+    },
+
+    "touch_id": {
+      "question": "Touch IDはある？",
+      "options": {
+        "はい": "has_se_logo",
+        "いいえ": "two_tone_back"
+      }
+    },
+
+    "has_se_logo": {
+      "question": "背面にSEと書いてある？",
+      "options": {
+        "はい": { "result": "iPhone SE (第1世代)" },
+        "いいえ": { "result": "iPhone 5s" }
+      }
+    },
+
+    "two_tone_back": {
+      "question": "背面は上下の帯とアルミのツートーン？",
+      "options": {
+        "はい": { "result": "iPhone 5" },
+        "いいえ": "colorful_back"
+      }
+    },
+
+    "colorful_back": {
+      "question": "背面が白・赤・黄・青・緑で角が丸い？",
+      "options": {
+        "はい": { "result": "iPhone 5c" },
+        "いいえ": "flat_glass_early"
+      }
+    },
+
+    "flat_glass_early": {
+      "question": "背面と側面が平ら？",
+      "options": {
+        "はい": "side_lines",
+        "いいえ": "black_bottom"
+      }
+    },
+
+    "side_lines": {
+      "question": "両サイドに2本ずつ線がある？",
+      "options": {
+        "はい": { "result": "iPhone 4S" },
+        "いいえ": { "result": "iPhone 4" }
+      }
+    },
+
+    "black_bottom": {
+      "question": "背面の下側が黒い？",
+      "options": {
+        "はい": { "result": "iPhone (初代)" },
+        "いいえ": "engraving_gloss"
+      }
+    },
+
+    "engraving_gloss": {
+      "question": "iPhone刻印に光沢がある？",
+      "options": {
+        "はい": { "result": "iPhone 3GS" },
+        "いいえ": { "result": "iPhone 3G" }
+      }
+    },
+
+    "glass_back": {
+      "question": "背面がガラスでワイヤレス充電対応？",
+      "options": {
+        "はい": "apple_center",
+        "いいえ": "antenna_lines"
+      }
+    },
+
+    "apple_center": {
+      "question": "りんごマークが中央にある？",
+      "options": {
+        "はい": "supports_5g",
+        "いいえ": "dual_camera_8"
+      }
+    },
+
+    "supports_5g": {
+      "question": "5Gに対応している？",
+      "options": {
+        "はい": { "result": "iPhone SE (第3世代)" },
+        "いいえ": { "result": "iPhone SE (第2世代)" }
+      }
+    },
+
+    "dual_camera_8": {
+      "question": "背面カメラは2つ？",
+      "options": {
+        "はい": { "result": "iPhone 8 Plus" },
+        "いいえ": { "result": "iPhone 8" }
+      }
+    },
+
+    "antenna_lines": {
+      "question": "背面に上下の線と下に2本線がある？",
+      "options": {
+        "はい": "has_s_logo",
+        "いいえ": "dual_camera_7"
+      }
+    },
+
+    "has_s_logo": {
+      "question": "背面にSがありIMEIが書いてない？",
+      "options": {
+        "はい": "size_6s",
+        "いいえ": "size_6"
+      }
+    },
+
+    "size_6s": {
+      "question": "画面サイズは？",
+      "options": {
+        "普通": { "result": "iPhone 6s" },
+        "大きい": { "result": "iPhone 6s Plus" }
+      }
+    },
+
+    "size_6": {
+      "question": "画面サイズは？",
+      "options": {
+        "普通": { "result": "iPhone 6" },
+        "大きい": { "result": "iPhone 6 Plus" }
+      }
+    },
+
+    "dual_camera_7": {
+      "question": "背面カメラは2つ？",
+      "options": {
+        "はい": { "result": "iPhone 7 Plus" },
+        "いいえ": { "result": "iPhone 7" }
+      }
+    },
+
+    "curved_side": {
+      "question": "側面が丸い？",
+      "options": {
+        "はい": "rounded_camera_count",
+        "いいえ": "flat_camera_count"
+      }
+    },
+
+    "rounded_camera_count": {
+      "question": "背面カメラは1つ？",
+      "options": {
+        "はい": { "result": "iPhone XR" },
+        "いいえ": "two_camera_rounded"
+      }
+    },
+
+    "two_camera_rounded": {
+      "question": "フラッシュが2眼の中央横？",
+      "options": {
+        "はい": { "result": "iPhone 11" },
+        "いいえ": "xs_check"
+      }
+    },
+
+    "xs_check": {
+      "question": "ゴールドがありモデル番号がA1920系？",
+      "options": {
+        "はい": "xs_size",
+        "いいえ": { "result": "iPhone X" }
+      }
+    },
+
+    "xs_size": {
+      "question": "画面サイズは？",
+      "options": {
+        "普通": { "result": "iPhone XS" },
+        "大きい": { "result": "iPhone XS Max" }
+      }
+    }
+  }
+}
