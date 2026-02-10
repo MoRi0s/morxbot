@@ -206,7 +206,7 @@
       }
     },
 
-    "flat_camera_count1": {
+    "flat_camera_count": {
       "question": "背面のカメラは1つ？",
       "options": {
         "はい": "cam_control",
