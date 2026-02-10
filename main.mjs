@@ -166,14 +166,14 @@ if (stateId === "confirm" && answer === "yes") {
   rankData.totalPlay += 1;
 
   // 的中した機種
-  const model = next.result;
+  const model = state.result;
   rankData.models[model] = (rankData.models[model] ?? 0) + 1;
 
   fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
   const embed = new EmbedBuilder()
     .setTitle("🎉 やったー！😊")
-    .setDescription("( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！")
+    .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！\n\n✅ 結果: ${model}`)
     .setColor(0x00ff00);
 
   return interaction.update({
