@@ -42,7 +42,7 @@
     },
 
     "colorful_back": {
-      "question": "背面が白・赤・黄・青・緑で角が丸い？",
+      "question": "背面のカラーが白、赤、黄、青、緑で背面の角が少し落ちてる？",
       "options": {
         "はい": { "result": "iPhone 5c" },
         "いいえ": "flat_glass_early"
@@ -74,7 +74,7 @@
     },
 
     "engraving_gloss": {
-      "question": "iPhone刻印に光沢がある？",
+      "question": "背面のiPhone刻印に光沢がある？",
       "options": {
         "はい": { "result": "iPhone 3GS" },
         "いいえ": { "result": "iPhone 3G" }
@@ -90,7 +90,7 @@
     },
 
     "apple_center": {
-      "question": "りんごマークが中央にある？",
+      "question": "背面のりんごマークが中央にある？",
       "options": {
         "はい": "supports_5g",
         "いいえ": "dual_camera_8"
@@ -114,7 +114,7 @@
     },
 
     "antenna_lines": {
-      "question": "背面に上下の線と下に2本線がある？",
+      "question": "背面の上と下に2本ずつ、計4本の線がある？",
       "options": {
         "はい": "has_s_logo",
         "いいえ": "dual_camera_7"
@@ -122,7 +122,7 @@
     },
 
     "has_s_logo": {
-      "question": "背面にSがありIMEIが書いてない？",
+      "question": "背面にSと書かれたマークがありIMEIが書いてない？",
       "options": {
         "はい": "size_6s",
         "いいえ": "size_6"
@@ -168,9 +168,22 @@
         "いいえ": "two_camera_rounded"
       }
     },
-
     "two_camera_rounded": {
-      "question": "フラッシュが2眼の中央横？",
+      "question": "背面カメラは2つ？",
+      "options": {
+        "はい": "iphone11orxx",
+        "いいえ": "iphone11pro"
+      }
+    },
+    "iphone11proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result": "iPhone 11 Pro" },
+        "大きい": { "result": "iPhone 11 Pro Max" }
+      }
+    },
+    "iphone11orxx": {
+      "question": "フラッシュが縦に並んでいる２つのレンズの中央横？",
       "options": {
         "はい": { "result": "iPhone 11" },
         "いいえ": "xs_check"
@@ -178,7 +191,7 @@
     },
 
     "xs_check": {
-      "question": "ゴールドがありモデル番号がA1920系？",
+      "question": "カラーバリエーションにゴールドがあって、モデル番号がA1920、A2097、A2098（日本）、A2099、A2100（中国本土）のどれか？",
       "options": {
         "はい": "xs_size",
         "いいえ": { "result": "iPhone X" }
@@ -191,6 +204,214 @@
         "普通": { "result": "iPhone XS" },
         "大きい": { "result": "iPhone XS Max" }
       }
+    },
+
+    "flat_camera_count1": {
+      "question": "背面のカメラは1つ？",
+      "options": {
+        "はい": "cam_control",
+        "いいえ": "flat_cam_2"
+      }
+    },
+
+    "cam_control": {
+      "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
+      "options": {
+        "はい": { "result": "iPhone Air" },
+        "いいえ": { "result": "iPhone 16e" }
+      }
+    },
+
+    "flat_cam_2": {
+      "question": "背面のカメラは2つ？",
+      "options": {
+        "はい": "cam_vertical",
+        "いいえ": "dynamic_islandpro"
+      }
+    },
+
+    "cam_vertical": {
+      "question": "背面のカメラは縦に並んでいる？",
+      "options": {
+        "はい": "cam_control2",
+        "いいえ": "dynamic_island"
+      }
+    },
+
+        "cam_control2": {
+      "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
+      "options": {
+        "はい": "mobiledataesim",
+        "いいえ": "iphone12series"
+      }
+    },
+
+            "mobiledataesim": {
+      "question": "日本版はeSIMのみ対応で、モバイルデータ通信のときに5G+と表示される？",
+      "options": {
+        "はい": { "result" : "iPhone 17" },
+        "いいえ": "iphone16series"
+      }
+    },
+
+    "iphone16series": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 16" },
+        "大きい": { "result" : "iPhone 16 Plus" }
+      }
+    },
+    
+        "iphone12series": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 12" },
+        "小さい": { "result" : "iPhone 12 mini" }
+      }
+    },
+
+    "dynamic_island": {
+      "question": "Dynamic Island（インカメラが島のようなパンチホールになっているもの）対応機種？",
+      "options": {
+        "はい": "iphone15series",
+        "いいえ": "flash_light"
+      }
+    },
+
+    "flash_light": {
+      "question": "フラッシュライトは◉みたいな形で、丸型のライトの中に丸い発光部分がある？",
+      "options": {
+        "はい": "iphone14series",
+        "いいえ": "iphone13series" 
+      }
+    },
+
+    "iphone15series": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 15" },
+        "大きい": { "result" : "iPhone 15 Plus" }
+      }
+    },
+
+    "iphone14series": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 14" },
+        "大きい": { "result" : "iPhone 14 Plus" }
+      }
+    },
+
+    "iphone13series": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 13" },
+        "小さい": { "result" : "iPhone 13 mini" }
+      }
+    },
+
+    "dynamic_islandpro": {
+      "question": "Dynamic Island（インカメラが島のようなパンチホールになっているもの）対応機種？",
+      "options": {
+        "はい": "lightning",
+        "いいえ": "notchsize"
+      }
+    },
+
+    "lightning": {
+      "question": "充電端子はLightning？",
+      "options": {
+        "はい": "iphone14proseries",
+        "いいえ": "cam_control3"
+      }
+    },
+
+    "cam_control3": {
+      "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
+      "options": {
+        "はい": "cam_design",
+        "いいえ": "iphone15proseries"
+      }
+    },
+
+    "cam_design": {
+      "question": "フラッシュとLiDARスキャナ（黒い点みたいなやつ）が背面の右側にあって、筐体がアルミでできている？",
+      "options": {
+        "はい": "iphone17proseries",
+        "いいえ": "iphone16proseries"
+      }
+    },
+
+    "iphone14proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 14 Pro" },
+        "大きい": { "result" : "iPhone 14 Pro Max" }
+      }
+    },
+
+    "iphone15proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 15 Pro" },
+        "大きい": { "result" : "iPhone 15 Pro Max" }
+      }
+    },
+
+    "iphone16proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 16 Pro" },
+        "大きい": { "result" : "iPhone 16 Pro Max" }
+      }
+    },
+
+    "iphone17proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 17 Pro" },
+        "大きい": { "result" : "iPhone 17 Pro Max" }
+      }
+    },
+
+    "notchsize": {
+      "question": "ノッチが小さく（幅が画面の半分以下）、カメラはマクロ（接写）撮影に対応している？",
+      "options": {
+        "はい": "iphone13proseries",
+        "いいえ": "iphone12proseries"
+      }
+    },
+
+    "iphone13proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 13 Pro" },
+        "大きい": { "result" : "iPhone 13 Pro Max" }
+      }
+    },
+
+    "iphone12proseries": {
+      "question": "画面のサイズは？",
+      "options": {
+        "普通": { "result" : "iPhone 12 Pro" },
+        "大きい": { "result" : "iPhone 12 Pro Max" }
+      }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   }
 }
