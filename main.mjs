@@ -133,7 +133,7 @@ client.on("interactionCreate", async (interaction) => {
    * ============================= */
   if (!interaction.isButton()) return;
 
-/* ===== iPhone Akinator ===== */
+  /* ===== iPhone Akinator ===== */
 if (interaction.customId.startsWith("iphoneaki:")) {
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
@@ -146,7 +146,14 @@ if (interaction.customId.startsWith("iphoneaki:")) {
   const aki = JSON.parse(fs.readFileSync(akiFile, "utf8"));
   const [, stateId, answer, ownerId] = interaction.customId.split(":");
 
-  // ✅ state は最初に1回だけ
+  // 他人ブロック
+  if (interaction.user.id !== ownerId) {
+    return interaction.reply({
+      content: "⛔ これは他の人のアキネーターです",
+      flags: 64
+    });
+  }
+
   const state = aki.states[stateId];
   if (!state) {
     return interaction.update({
@@ -155,72 +162,104 @@ if (interaction.customId.startsWith("iphoneaki:")) {
     });
   }
 
-  // ✅ 他人ブロック
-  if (interaction.user.id !== ownerId) {
-    return interaction.reply({
-      content: "⛔ これは他の人のアキネーターです",
-      flags: 64
-    });
-  }
-
-  /* === 確認 YES（的中） === */
-  if (stateId === "confirm" && answer === "yes") {
+  /* ===== 確認フェーズ ===== */
+  if (stateId === "confirm") {
     const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
-
     let rankData = { totalPlay: 0, models: {} };
     if (fs.existsSync(rankFile)) {
       rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
     }
 
+    // 総プレイ回数は yes / no どちらでも増やす
     rankData.totalPlay += 1;
-
-    const model = state.result;
-    rankData.models[model] = (rankData.models[model] ?? 0) + 1;
-
     fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
-    const embed = new EmbedBuilder()
-      .setTitle("🎉 やったー！😊")
-      .setDescription(
-        `( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！\n\n✅ 結果: ${model}`
-      )
-      .setColor(0x00ff00);
+    // === YES（的中）===
+    if (answer === "yes") {
+      const model = state.result;
+      rankData.models[model] = (rankData.models[model] ?? 0) + 1;
+      fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
+      const embed = new EmbedBuilder()
+        .setTitle("🎉 やったー！😊")
+        .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！\n\n✅ 結果: ${model}`)
+        .setColor(0x00ff00);
+
+      return interaction.update({
+        embeds: [embed],
+        components: []
+      });
+    }
+
+    // === NO（最初に戻す）===
+    if (answer === "no") {
+      const startId = aki.start;
+      const startState = aki.states[startId];
+
+      const embed = new EmbedBuilder()
+        .setTitle("📱 iPhoneアキネーター")
+        .setDescription(startState.question)
+        .setColor(0x0099ff);
+
+      const row = new ActionRowBuilder();
+      for (const label of Object.keys(startState.options)) {
+        row.addComponents(
+          new ButtonBuilder()
+            .setLabel(label)
+            .setStyle(ButtonStyle.Primary)
+            .setCustomId(`iphoneaki:${startId}:${label}:${ownerId}`)
+        );
+      }
+
+      return interaction.update({
+        embeds: [embed],
+        components: [row]
+      });
+    }
+  }
+
+  /* ===== 通常質問フェーズ ===== */
+  const option = state.options?.[answer];
+  if (!option || !option.next) {
     return interaction.update({
-      embeds: [embed],
+      content: "❌ 次の状態が見つかりません",
       components: []
     });
   }
 
-  /* === 確認 NO → 最初に戻す === */
-  if (stateId === "confirm" && answer === "no") {
-    const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
+  const nextStateId = option.next;
+  const nextState = aki.states[nextStateId];
+  if (!nextState) {
+    return interaction.update({
+      content: "❌ 次の状態データが見つかりません",
+      components: []
+    });
+  }
 
-    let rankData = { totalPlay: 0, models: {} };
-    if (fs.existsSync(rankFile)) {
-      rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
-    }
+  /* === confirm に入る場合 === */
+  if (nextStateId === "confirm") {
+    const template =
+      aki.confirmMessages[
+        Math.floor(Math.random() * aki.confirmMessages.length)
+      ];
 
-    rankData.totalPlay += 1;
-    fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
-
-    const start = aki.start;
-    const startState = aki.states[start];
+    const message = template.replace("{result}", nextState.result);
 
     const embed = new EmbedBuilder()
-      .setTitle("📱 iPhoneアキネーター")
-      .setDescription(startState.question)
-      .setColor(0x0099ff);
+      .setTitle("📱 判定結果")
+      .setDescription(message)
+      .setColor(0xffcc00);
 
-    const row = new ActionRowBuilder();
-    for (const label of Object.keys(startState.options)) {
-      row.addComponents(
-        new ButtonBuilder()
-          .setLabel(label)
-          .setStyle(ButtonStyle.Primary)
-          .setCustomId(`iphoneaki:${start}:${label}:${ownerId}`)
-      );
-    }
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("はい")
+        .setStyle(ButtonStyle.Success)
+        .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
+      new ButtonBuilder()
+        .setLabel("いいえ")
+        .setStyle(ButtonStyle.Danger)
+        .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
+    );
 
     return interaction.update({
       embeds: [embed],
@@ -228,30 +267,10 @@ if (interaction.customId.startsWith("iphoneaki:")) {
     });
   }
 
-  /* === 通常の質問遷移 === */
-  const next = state.options?.[answer];
-  if (!next) {
-    return interaction.update({
-      content: "❌ 次の状態が見つかりません",
-      components: []
-    });
-  }
-
-  const nextState = aki.states[next];
-
-  // confirm に行く場合のランダム文
-  let description = nextState.question;
-  if (next === "confirm") {
-    const template =
-      aki.confirmMessages[
-        Math.floor(Math.random() * aki.confirmMessages.length)
-      ];
-    description = template.replace("{result}", nextState.result);
-  }
-
+  /* === 次の質問 === */
   const embed = new EmbedBuilder()
     .setTitle("📱 iPhoneアキネーター")
-    .setDescription(description)
+    .setDescription(nextState.question)
     .setColor(0x0099ff);
 
   const row = new ActionRowBuilder();
@@ -260,7 +279,7 @@ if (interaction.customId.startsWith("iphoneaki:")) {
       new ButtonBuilder()
         .setLabel(label)
         .setStyle(ButtonStyle.Primary)
-        .setCustomId(`iphoneaki:${next}:${label}:${ownerId}`)
+        .setCustomId(`iphoneaki:${nextStateId}:${label}:${ownerId}`)
     );
   }
 
@@ -270,57 +289,6 @@ if (interaction.customId.startsWith("iphoneaki:")) {
   });
 }
 
-
-const message = template.replace("{result}", next.result);
-
-/* === 結果 → 確認フェーズ === */
-if (typeof next === "object" && next.result) {
-  const embed = new EmbedBuilder()
-    .setTitle("📱 判定結果")
-    .setDescription(message)
-    .setColor(0xffcc00);
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setLabel("はい")
-      .setStyle(ButtonStyle.Success)
-      .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
-
-    new ButtonBuilder()
-      .setLabel("いいえ")
-      .setStyle(ButtonStyle.Danger)
-      .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
-  );
-
-  return interaction.update({
-    embeds: [embed],
-    components: [row]
-  });
-}
-
-
-    /* === 次の質問 === */
-    const nextState = aki.states[next];
-    const embed = new EmbedBuilder()
-      .setTitle("📱 iPhoneアキネーター")
-      .setDescription(nextState.question)
-      .setColor(0x0099ff);
-
-    const row = new ActionRowBuilder();
-    for (const label of Object.keys(nextState.options)) {
-      row.addComponents(
-        new ButtonBuilder()
-          .setLabel(label)
-          .setStyle(ButtonStyle.Primary)
-          .setCustomId(`iphoneaki:${next}:${label}:${ownerId}`)
-      );
-    }
-
-    return interaction.update({
-      embeds: [embed],
-      components: [row]
-    });
-});
 
 // -------------------------
 // Basic message listener
