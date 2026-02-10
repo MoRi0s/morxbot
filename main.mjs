@@ -135,6 +135,7 @@ client.on("interactionCreate", async (interaction) => {
 
   /* ===== iPhone Akinator ===== */
   if (interaction.customId.startsWith("iphoneaki:")) {
+    await interaction.deferUpdate();
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
     return interaction.update({
@@ -287,7 +288,7 @@ client.on("interactionCreate", async (interaction) => {
     embeds: [embed],
     components: [row]
   });
-  
+
 }}) // End of iphoneaki button handler
 
 
