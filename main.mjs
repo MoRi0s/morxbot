@@ -152,7 +152,7 @@ if (interaction.isChatInputCommand()) {
 
   // confirmのときだけ構造が違う
   if (stateId === "confirm") {
-    result = parts[3];
+    result = decodeURIComponent(parts[3]);
     ownerId = parts[4];
   } else {
     ownerId = parts[3];
@@ -285,11 +285,11 @@ if (nextState.result) {
     new ButtonBuilder()
       .setLabel("はい")
       .setStyle(ButtonStyle.Success)
-      .setCustomId(`iphoneaki:confirm:yes:${nextState.result}:${ownerId}`),
+      .setCustomId(`iphoneaki:confirm:yes:${encodeURIComponent(nextState.result)}:${ownerId}`),
     new ButtonBuilder()
       .setLabel("いいえ")
       .setStyle(ButtonStyle.Danger)
-      .setCustomId(`iphoneaki:confirm:no:${nextState.result}:${ownerId}`)
+      .setCustomId(`iphoneaki:confirm:no:${encodeURIComponent(nextState.result)}:${ownerId}`)
   );
 
   return interaction.update({
