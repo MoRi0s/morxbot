@@ -41,7 +41,7 @@ export async function execute(interaction, context) {
     );
   }
 
-  await interaction.reply({
+  return interaction.editReply({
     embeds: [embed],
     components: [row]
   });
