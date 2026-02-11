@@ -314,7 +314,7 @@
     "cam_control": {
       "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
       "options": {
-        "はい": "iphoneAir",
+        "はい": "iphoneair",
         "いいえ": "iphone16e"
       }
     },
