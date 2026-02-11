@@ -107,22 +107,14 @@ const context = {
   dataDir: path.join(__dirname, 'data')
 };
 
-// Ensure data dir exists
-if (!fs.existsSync(context.dataDir)) fs.mkdirSync(context.dataDir, { recursive: true });
-
 client.on("interactionCreate", async (interaction) => {
 
-/* ===== iPhone Akinator ===== */
-if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
-
-  // これを最初に1回だけ
-  if (!interaction.deferred && !interaction.replied) {
-    await interaction.deferUpdate();
-  }
+  if (!interaction.isButton()) return;
+  if (!interaction.customId?.startsWith("iphoneaki:")) return;
 
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
-    return interaction.editReply({
+    return interaction.update({
       content: "❌ アキネーターデータが見つかりません",
       embeds: [],
       components: []
@@ -134,7 +126,7 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
 
   // 他人ブロック
   if (interaction.user.id !== ownerId) {
-    return interaction.followUp({
+    return interaction.reply({
       content: "⛔ これは他の人のアキネーターです",
       ephemeral: true
     });
@@ -142,14 +134,16 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
 
   const state = aki.states[stateId];
   if (!state) {
-    return interaction.editReply({
+    return interaction.update({
       content: "❌ 状態が見つかりません",
       embeds: [],
       components: []
     });
   }
 
-  /* ===== 確認フェーズ ===== */
+  /* =============================
+     確認フェーズ
+  ============================= */
   if (stateId === "confirm") {
 
     const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
@@ -162,7 +156,6 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
     // 総プレイ回数は必ず+1
     rankData.totalPlay += 1;
 
-    // YES → 機種ランキング追加
     if (answer === "yes") {
       const model = state.result;
       rankData.models[model] = (rankData.models[model] ?? 0) + 1;
@@ -170,21 +163,22 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
 
     fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
-    // YESなら終了画面
+    // YES → 終了
     if (answer === "yes") {
       const embed = new EmbedBuilder()
         .setTitle("🎉 やったー！😊")
-        .setDescription(`✅ 結果: ${state.result}`)
+        .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！君のiPhoneは${state.result}なんだね！✨`)
         .setColor(0x00ff00);
 
-      return interaction.editReply({
+      return interaction.update({
         embeds: [embed],
         components: []
       });
     }
 
-    // NOなら最初に戻す（プレイ回数だけ加算済み）
+    // NO → 最初に戻る
     if (answer === "no") {
+
       const startId = aki.start;
       const startState = aki.states[startId];
 
@@ -203,18 +197,20 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
         );
       }
 
-      return interaction.editReply({
+      return interaction.update({
         embeds: [embed],
         components: [row]
       });
     }
   }
 
-  /* ===== 通常質問フェーズ ===== */
+  /* =============================
+     通常質問フェーズ
+  ============================= */
 
   const nextStateId = state.options?.[answer];
   if (!nextStateId) {
-    return interaction.editReply({
+    return interaction.update({
       content: "❌ 次の状態が見つかりません",
       embeds: [],
       components: []
@@ -223,7 +219,7 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
 
   const nextState = aki.states[nextStateId];
   if (!nextState) {
-    return interaction.editReply({
+    return interaction.update({
       content: "❌ 次の状態データが見つかりません",
       embeds: [],
       components: []
@@ -256,7 +252,7 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
         .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
     );
 
-    return interaction.editReply({
+    return interaction.update({
       embeds: [embed],
       components: [row]
     });
@@ -278,12 +274,10 @@ if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
     );
   }
 
-  return interaction.editReply({
+  return interaction.update({
     embeds: [embed],
     components: [row]
   });
-
-}
 
 });
 
