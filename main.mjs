@@ -195,7 +195,7 @@ if (!state && stateId !== "confirm") {
     rankData.totalPlay += 1;
 
     if (answer === "yes") {
-      const model = state.result;
+      const model = result;
       rankData.models[model] = (rankData.models[model] ?? 0) + 1;
     }
 
