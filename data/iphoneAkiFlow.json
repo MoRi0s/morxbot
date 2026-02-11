@@ -1,6 +1,75 @@
 {
   "start": "home_button",
   "states": {
+
+    "iphone1":{ "result": "iPhone (初代)" },
+    "iphone3g":{ "result": "iPhone 3G" },
+    "iphone3gs":{ "result": "iPhone 3GS" },
+    "iphone4":{ "result": "iPhone 4" },
+    "iphone4s":{ "result": "iPhone 4S" },
+    "iphone5":{ "result": "iPhone 5" },
+    "iphone5c":{ "result": "iPhone 5c" },
+    "iphone5s":{ "result": "iPhone 5s" },
+    "iphonese1":{ "result": "iPhone SE (第1世代)" },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     "home_button": {
       "question": "ホームボタンはある？",
       "options": {
@@ -28,15 +97,15 @@
     "has_se_logo": {
       "question": "背面にSEと書いてある？",
       "options": {
-        "はい": { "result": "iPhone SE (第1世代)" },
-        "いいえ": { "result": "iPhone 5s" }
+        "はい": "iphonese1",
+        "いいえ": "iphone5s"
       }
     },
 
     "two_tone_back": {
       "question": "背面は上下の帯とアルミのツートーン？",
       "options": {
-        "はい": { "result": "iPhone 5" },
+        "はい": "iphone5",
         "いいえ": "colorful_back"
       }
     },
@@ -44,7 +113,7 @@
     "colorful_back": {
       "question": "背面のカラーが白、赤、黄、青、緑で背面の角が少し落ちてる？",
       "options": {
-        "はい": { "result": "iPhone 5c" },
+        "はい": "iphone5c",
         "いいえ": "flat_glass_early"
       }
     },
@@ -60,15 +129,15 @@
     "side_lines": {
       "question": "両サイドに2本ずつ線がある？",
       "options": {
-        "はい": { "result": "iPhone 4S" },
-        "いいえ": { "result": "iPhone 4" }
+        "はい": "iphone4s",
+        "いいえ": "iphone4"
       }
     },
 
     "black_bottom": {
       "question": "背面の下側が黒い？",
       "options": {
-        "はい": { "result": "iPhone (初代)" },
+        "はい": "iphone1",
         "いいえ": "engraving_gloss"
       }
     },
@@ -76,8 +145,8 @@
     "engraving_gloss": {
       "question": "背面のiPhone刻印に光沢がある？",
       "options": {
-        "はい": { "result": "iPhone 3GS" },
-        "いいえ": { "result": "iPhone 3G" }
+        "はい": "iphone3gs",
+        "いいえ": "iphone3g"
       }
     },
 
@@ -414,6 +483,14 @@
 
 
 
+
+
+
+
+
+
+
+
   },
 
 
@@ -423,6 +500,4 @@
     "うーん...**{result}**かな？🤔",
     "**{result}**、当たってる気がする！どうかな？😊"
   ]
-
-
 }
