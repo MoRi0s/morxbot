@@ -142,7 +142,22 @@ if (interaction.isChatInputCommand()) {
   }
 
   const aki = JSON.parse(fs.readFileSync(akiFile, "utf8"));
-  const [, stateId, answer, ownerId] = interaction.customId.split(":");
+  const parts = interaction.customId.split(":");
+
+  const stateId = parts[1];
+  const answer = parts[2];
+
+  let result = null;
+  let ownerId;
+
+  // confirmのときだけ構造が違う
+  if (stateId === "confirm") {
+    result = parts[3];
+    ownerId = parts[4];
+  } else {
+    ownerId = parts[3];
+  }
+
 
   // 他人ブロック
   if (interaction.user.id !== ownerId) {
@@ -152,20 +167,23 @@ if (interaction.isChatInputCommand()) {
     });
   }
 
-  const state = aki.states[stateId];
-  if (!state) {
-    return interaction.update({
-      content: "❌ 状態が見つかりません",
-      embeds: [],
-      components: []
-    });
-  }
+let state = aki.states[stateId];
+
+// confirmはstatesに存在しないのでスキップ
+if (!state && stateId !== "confirm") {
+  return interaction.update({
+    content: "❌ 状態が見つかりません",
+    embeds: [],
+    components: []
+  });
+}
+
 
   /* =============================
      確認フェーズ
   ============================= */
   if (stateId === "confirm") {
-
+    const model = result;
     const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
     let rankData = { totalPlay: 0, models: {} };
 
@@ -187,7 +205,7 @@ if (interaction.isChatInputCommand()) {
     if (answer === "yes") {
       const embed = new EmbedBuilder()
         .setTitle("🎉 やったー！😊")
-        .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！君のiPhoneは${state.result}なんだね！✨`)
+        .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！君のiPhoneは${model}なんだね！✨`)
         .setColor(0x00ff00);
 
       return interaction.update({
@@ -267,11 +285,11 @@ if (nextState.result) {
     new ButtonBuilder()
       .setLabel("はい")
       .setStyle(ButtonStyle.Success)
-      .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
+      .setCustomId(`iphoneaki:confirm:yes:${nextState.result}:${ownerId}`),
     new ButtonBuilder()
       .setLabel("いいえ")
       .setStyle(ButtonStyle.Danger)
-      .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
+      .setCustomId(`iphoneaki:confirm:no:${nextState.result}:${ownerId}`)
   );
 
   return interaction.update({
