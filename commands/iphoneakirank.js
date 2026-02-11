@@ -11,7 +11,7 @@ export async function execute(interaction, context) {
   const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
   if (!fs.existsSync(rankFile)) {
-    return interaction.reply({
+    return interaction.editReply({
       content: "📊 まだランキングデータがありません",
       flags: 64
     });
@@ -21,7 +21,7 @@ export async function execute(interaction, context) {
   const models = Object.entries(rankData.models ?? {});
 
   if (models.length === 0) {
-    return interaction.reply({
+    return interaction.editReply({
       content: "📊 まだ的中データがありません",
       flags: 64
     });
@@ -49,7 +49,7 @@ const embed = new EmbedBuilder()
   });
 
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [embed]
   });
 }

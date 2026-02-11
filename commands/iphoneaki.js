@@ -16,7 +16,7 @@ export async function execute(interaction, context) {
   await interaction.deferReply();
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
-    return interaction.reply({
+    return interaction.editReply({
       content: "❌ iphoneAkiFlow.json が見つかりません",
       flags: 64
     });
