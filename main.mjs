@@ -112,34 +112,19 @@ if (!fs.existsSync(context.dataDir)) fs.mkdirSync(context.dataDir, { recursive: 
 
 client.on("interactionCreate", async (interaction) => {
 
-  /* =============================
-   * Slash Commands
-   * ============================= */
-  if (interaction.isChatInputCommand()) {
-    const command = client.commands.get(interaction.commandName);
-    if (!command) return;
+/* ===== iPhone Akinator ===== */
+if (interaction.isButton() && interaction.customId?.startsWith("iphoneaki:")) {
 
-    try {
-      await command.execute(interaction, context);
-    } catch (err) {
-  console.error("❌ Command execute error:", err);
-  // ❗ ここでは絶対に reply しない
-  }
-    return;
-  }
-
-  /* =============================
-   * Buttons
-   * ============================= */
-  if (!interaction.isButton()) return;
-
-  /* ===== iPhone Akinator ===== */
-  if (interaction.customId.startsWith("iphoneaki:")) {
+  // これを最初に1回だけ
+  if (!interaction.deferred && !interaction.replied) {
     await interaction.deferUpdate();
+  }
+
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
-    return interaction.update({
+    return interaction.editReply({
       content: "❌ アキネーターデータが見つかりません",
+      embeds: [],
       components: []
     });
   }
@@ -149,50 +134,56 @@ client.on("interactionCreate", async (interaction) => {
 
   // 他人ブロック
   if (interaction.user.id !== ownerId) {
-    return interaction.reply({
+    return interaction.followUp({
       content: "⛔ これは他の人のアキネーターです",
-      flags: 64
+      ephemeral: true
     });
   }
 
   const state = aki.states[stateId];
   if (!state) {
-    return interaction.update({
+    return interaction.editReply({
       content: "❌ 状態が見つかりません",
+      embeds: [],
       components: []
     });
   }
 
   /* ===== 確認フェーズ ===== */
   if (stateId === "confirm") {
+
     const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
     let rankData = { totalPlay: 0, models: {} };
+
     if (fs.existsSync(rankFile)) {
       rankData = JSON.parse(fs.readFileSync(rankFile, "utf8"));
     }
 
-    // 総プレイ回数は yes / no どちらでも増やす
+    // 総プレイ回数は必ず+1
     rankData.totalPlay += 1;
-    fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
 
-    // === YES（的中）===
+    // YES → 機種ランキング追加
     if (answer === "yes") {
       const model = state.result;
       rankData.models[model] = (rankData.models[model] ?? 0) + 1;
-      fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
+    }
 
+    fs.writeFileSync(rankFile, JSON.stringify(rankData, null, 2));
+
+    // YESなら終了画面
+    if (answer === "yes") {
       const embed = new EmbedBuilder()
         .setTitle("🎉 やったー！😊")
-        .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！\n\n✅ 結果: ${model}`)
+        .setDescription(`✅ 結果: ${state.result}`)
         .setColor(0x00ff00);
 
-      return interaction.update({
+      return interaction.editReply({
         embeds: [embed],
         components: []
       });
     }
 
-    // === NO（最初に戻す）===
+    // NOなら最初に戻す（プレイ回数だけ加算済み）
     if (answer === "no") {
       const startId = aki.start;
       const startState = aki.states[startId];
@@ -212,7 +203,7 @@ client.on("interactionCreate", async (interaction) => {
         );
       }
 
-      return interaction.update({
+      return interaction.editReply({
         embeds: [embed],
         components: [row]
       });
@@ -220,25 +211,28 @@ client.on("interactionCreate", async (interaction) => {
   }
 
   /* ===== 通常質問フェーズ ===== */
-  const option = state.options?.[answer];
-  if (!option || !option.next) {
-    return interaction.update({
+
+  const nextStateId = state.options?.[answer];
+  if (!nextStateId) {
+    return interaction.editReply({
       content: "❌ 次の状態が見つかりません",
+      embeds: [],
       components: []
     });
   }
 
-  const nextStateId = option.next;
   const nextState = aki.states[nextStateId];
   if (!nextState) {
-    return interaction.update({
+    return interaction.editReply({
       content: "❌ 次の状態データが見つかりません",
+      embeds: [],
       components: []
     });
   }
 
-  /* === confirm に入る場合 === */
+  // confirm に入る場合
   if (nextStateId === "confirm") {
+
     const template =
       aki.confirmMessages[
         Math.floor(Math.random() * aki.confirmMessages.length)
@@ -262,13 +256,13 @@ client.on("interactionCreate", async (interaction) => {
         .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
     );
 
-    return interaction.update({
+    return interaction.editReply({
       embeds: [embed],
       components: [row]
     });
   }
 
-  /* === 次の質問 === */
+  // 通常質問
   const embed = new EmbedBuilder()
     .setTitle("📱 iPhoneアキネーター")
     .setDescription(nextState.question)
@@ -284,13 +278,14 @@ client.on("interactionCreate", async (interaction) => {
     );
   }
 
-  return interaction.update({
+  return interaction.editReply({
     embeds: [embed],
     components: [row]
   });
 
-}}) // End of iphoneaki button handler
+}
 
+});
 
 // -------------------------
 // Basic message listener
