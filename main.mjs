@@ -227,8 +227,8 @@ if (interaction.isChatInputCommand()) {
   /* =============================
      通常質問フェーズ
   ============================= */
-
 const nextStateId = state.options?.[answer];
+
 if (!nextStateId) {
   return interaction.update({
     content: "❌ 次の状態が見つかりません",
@@ -237,10 +237,19 @@ if (!nextStateId) {
   });
 }
 
-// ✅ confirm は先に処理
-if (nextStateId === "confirm") {
+// 通常ステート取得
+const nextState = aki.states[nextStateId];
 
-  const nextState = state; // confirmは今のstate.resultを使う
+if (!nextState) {
+  return interaction.update({
+    content: "❌ 次の状態データが見つかりません",
+    embeds: [],
+    components: []
+  });
+}
+
+// ✅ resultステートならここで処理
+if (nextState.result) {
 
   const template =
     aki.confirmMessages[
@@ -271,15 +280,6 @@ if (nextStateId === "confirm") {
   });
 }
 
-// 通常ステート取得
-const nextState = aki.states[nextStateId];
-if (!nextState) {
-  return interaction.update({
-    content: "❌ 次の状態データが見つかりません",
-    embeds: [],
-    components: []
-  });
-}
 
   // 通常質問
   const embed = new EmbedBuilder()

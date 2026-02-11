@@ -11,20 +11,48 @@
     "iphone5c":{ "result": "iPhone 5c" },
     "iphone5s":{ "result": "iPhone 5s" },
     "iphonese1":{ "result": "iPhone SE (第1世代)" },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    "iphone6":{ "result": "iPhone 6" },
+    "iphone6plus":{ "result": "iPhone 6 Plus" },
+    "iphone6s":{ "result": "iPhone 6s" },
+    "iphone6splus":{ "result": "iPhone 6s Plus" },
+    "iphone7":{ "result": "iPhone 7" },
+    "iphone7plus":{ "result": "iPhone 7 Plus" },
+    "iphone8":{ "result": "iPhone 8" },
+    "iphone8plus":{ "result": "iPhone 8 Plus" },
+    "iphoneX":{ "result": "iPhone X" },
+    "iphoneXs":{ "result": "iPhone Xs" },
+    "iphoneXsmax":{ "result": "iPhone Xs Max" },
+    "iphoneXR":{ "result": "iPhone XR" },
+    "iphone11":{ "result": "iPhone 11" },
+    "iphone11pro":{ "result": "iPhone 11 Pro" },
+    "iphone11promax":{ "result": "iPhone 11 Pro Max" },
+    "iphonese2":{ "result": "iPhone SE (第2世代)" },
+    "iphone12":{ "result": "iPhone 12" },
+    "iphone12mini":{ "result": "iPhone 12 mini" },
+    "iphone12pro":{ "result": "iPhone 12 Pro" },
+    "iphone12promax":{ "result": "iPhone 12 Pro Max" },
+    "iphone13":{ "result": "iPhone 13" },
+    "iphone13mini":{ "result": "iPhone 13 mini" },
+    "iphone13pro":{ "result": "iPhone 13 Pro" },
+    "iphone13promax":{ "result": "iPhone 13 Pro Max" },
+    "iphonese3":{ "result": "iPhone SE (第3世代)" },
+    "iphone14":{ "result": "iPhone 14" },
+    "iphone14plus":{ "result": "iPhone 14 Plus" },
+    "iphone14pro":{ "result": "iPhone 14 Pro" },
+    "iphone14promax":{ "result": "iPhone 14 Pro Max" },
+    "iphone15":{ "result": "iPhone 15" },
+    "iphone15plus":{ "result": "iPhone 15 Plus" },
+    "iphone15pro":{ "result": "iPhone 15 Pro" },
+    "iphone15promax":{ "result": "iPhone 15 Pro Max" },
+    "iphone16":{ "result": "iPhone 16" },
+    "iphone16plus":{ "result": "iPhone 16 Plus" },
+    "iphone16pro":{ "result": "iPhone 16 Pro" },
+    "iphone16promax":{ "result": "iPhone 16 Pro Max" },
+    "iphone16e":{ "result": "iPhone 16e" },
+    "iphone17":{ "result": "iPhone 17" },
+    "iphoneair":{ "result": "iPhone Air" },
+    "iphone17pro":{ "result": "iPhone 17 Pro" },
+    "iphone17promax":{ "result": "iPhone 17 Pro Max" },
 
 
 
@@ -169,16 +197,16 @@
     "supports_5g": {
       "question": "5Gに対応している？",
       "options": {
-        "はい": { "result": "iPhone SE (第3世代)" },
-        "いいえ": { "result": "iPhone SE (第2世代)" }
+        "はい": "iphonese3",
+        "いいえ": "iphonese2"
       }
     },
 
     "dual_camera_8": {
       "question": "背面カメラは2つ？",
       "options": {
-        "はい": { "result": "iPhone 8 Plus" },
-        "いいえ": { "result": "iPhone 8" }
+        "はい": "iphone8plus" ,
+        "いいえ": "iphone8"
       }
     },
 
@@ -201,24 +229,24 @@
     "size_6s": {
       "question": "画面サイズは？",
       "options": {
-        "普通": { "result": "iPhone 6s" },
-        "大きい": { "result": "iPhone 6s Plus" }
+        "普通": "iphone6s",
+        "大きい": "iphone6splus"
       }
     },
 
     "size_6": {
       "question": "画面サイズは？",
       "options": {
-        "普通": { "result": "iPhone 6" },
-        "大きい": { "result": "iPhone 6 Plus" }
+        "普通": "iphone6",
+        "大きい": "iphone6plus"
       }
     },
 
     "dual_camera_7": {
       "question": "背面カメラは2つ？",
       "options": {
-        "はい": { "result": "iPhone 7 Plus" },
-        "いいえ": { "result": "iPhone 7" }
+        "はい": "iphone7plus",
+        "いいえ": "iphone7"
       }
     },
 
@@ -233,7 +261,7 @@
     "rounded_camera_count": {
       "question": "背面カメラは1つ？",
       "options": {
-        "はい": { "result": "iPhone XR" },
+        "はい": "iphoneXR",
         "いいえ": "two_camera_rounded"
       }
     },
@@ -247,14 +275,14 @@
     "iphone11proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result": "iPhone 11 Pro" },
-        "大きい": { "result": "iPhone 11 Pro Max" }
+        "普通": "iphone11pro",
+        "大きい": "iphone11promax"
       }
     },
     "iphone11orxx": {
       "question": "フラッシュの位置は縦に並んでいる２つのレンズの右側？",
       "options": {
-        "はい": { "result": "iPhone 11" },
+        "はい": "iphone11",
         "いいえ": "xs_check"
       }
     },
@@ -263,15 +291,15 @@
       "question": "カラーバリエーションにゴールドがあって、モデル番号がA1920、A2097、A2098（日本）、A2099、A2100（中国本土）のどれか？",
       "options": {
         "はい": "xs_size",
-        "いいえ": { "result": "iPhone X" }
+        "いいえ": "iphoneX"
       }
     },
 
     "xs_size": {
       "question": "画面サイズは？",
       "options": {
-        "普通": { "result": "iPhone XS" },
-        "大きい": { "result": "iPhone XS Max" }
+        "普通": "iphoneXS",
+        "大きい": "iphoneXSMax"
       }
     },
 
@@ -286,8 +314,8 @@
     "cam_control": {
       "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
       "options": {
-        "はい": { "result": "iPhone Air" },
-        "いいえ": { "result": "iPhone 16e" }
+        "はい": "iphoneAir",
+        "いいえ": "iphone16e"
       }
     },
 
@@ -318,7 +346,7 @@
     "mobiledataesim": {
       "question": "日本版はeSIMのみ対応で、モバイルデータ通信のときに5G+と表示される？",
       "options": {
-        "はい": { "result" : "iPhone 17" },
+        "はい": "iphone17",
         "いいえ": "iphone16series"
       }
     },
@@ -326,16 +354,16 @@
     "iphone16series": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 16" },
-        "大きい": { "result" : "iPhone 16 Plus" }
+        "普通": "iphone16",
+        "大きい": "iphone16plus"
       }
     },
     
         "iphone12series": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 12" },
-        "小さい": { "result" : "iPhone 12 mini" }
+        "普通": "iphone12",
+        "小さい": "iphone12mini"
       }
     },
 
@@ -358,24 +386,24 @@
     "iphone15series": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 15" },
-        "大きい": { "result" : "iPhone 15 Plus" }
+        "普通": "iphone15",
+        "大きい": "iphone15plus"
       }
     },
 
     "iphone14series": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 14" },
-        "大きい": { "result" : "iPhone 14 Plus" }
+        "普通": "iphone14",
+        "大きい": "iphone14plus"
       }
     },
 
     "iphone13series": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 13" },
-        "小さい": { "result" : "iPhone 13 mini" }
+        "普通": "iphone13",
+        "小さい": "iphone13mini"
       }
     },
 
@@ -414,32 +442,32 @@
     "iphone14proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 14 Pro" },
-        "大きい": { "result" : "iPhone 14 Pro Max" }
+        "普通": "iphone14pro",
+        "大きい": "iphone14promax"
       }
     },
 
     "iphone15proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 15 Pro" },
-        "大きい": { "result" : "iPhone 15 Pro Max" }
+        "普通": "iphone15pro",
+        "大きい": "iphone15promax"
       }
     },
 
     "iphone16proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 16 Pro" },
-        "大きい": { "result" : "iPhone 16 Pro Max" }
+        "普通": "iphone16pro",
+        "大きい": "iphone16promax"
       }
     },
 
     "iphone17proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 17 Pro" },
-        "大きい": { "result" : "iPhone 17 Pro Max" }
+        "普通": "iphone17pro",
+        "大きい": "iphone17promax"
       }
     },
 
@@ -454,16 +482,16 @@
     "iphone13proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 13 Pro" },
-        "大きい": { "result" : "iPhone 13 Pro Max" }
+        "普通": "iphone13pro",
+        "大きい": "iphone13promax"
       }
     },
 
     "iphone12proseries": {
       "question": "画面のサイズは？",
       "options": {
-        "普通": { "result" : "iPhone 12 Pro" },
-        "大きい": { "result" : "iPhone 12 Pro Max" }
+        "普通": "iphone12pro",
+        "大きい": "iphone12promax"
       }
     }
 
