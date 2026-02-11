@@ -13,6 +13,7 @@ export const data = new SlashCommandBuilder()
   .setDescription("iPhoneアキネーターであなたのiPhoneを特定します");
 
 export async function execute(interaction, context) {
+  await interaction.deferReply();
   const akiFile = path.join(context.dataDir, "iphoneAkiFlow.json");
   if (!fs.existsSync(akiFile)) {
     return interaction.reply({

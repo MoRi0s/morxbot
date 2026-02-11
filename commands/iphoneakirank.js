@@ -7,6 +7,7 @@ export const data = new SlashCommandBuilder()
   .setDescription("iPhoneアキネーターの機種別ランキングを表示します");
 
 export async function execute(interaction, context) {
+  await interaction.deferReply();
   const rankFile = path.join(context.dataDir, "iphoneAkiRank.json");
 
   if (!fs.existsSync(rankFile)) {

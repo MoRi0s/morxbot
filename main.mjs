@@ -128,7 +128,7 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.user.id !== ownerId) {
     return interaction.reply({
       content: "⛔ これは他の人のアキネーターです",
-      ephemeral: true
+      flags: 64
     });
   }
 
