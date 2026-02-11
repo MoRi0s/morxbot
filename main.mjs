@@ -228,55 +228,58 @@ if (interaction.isChatInputCommand()) {
      通常質問フェーズ
   ============================= */
 
-  const nextStateId = state.options?.[answer];
-  if (!nextStateId) {
-    return interaction.update({
-      content: "❌ 次の状態が見つかりません",
-      embeds: [],
-      components: []
-    });
-  }
+const nextStateId = state.options?.[answer];
+if (!nextStateId) {
+  return interaction.update({
+    content: "❌ 次の状態が見つかりません",
+    embeds: [],
+    components: []
+  });
+}
 
-  const nextState = aki.states[nextStateId];
-  if (!nextState) {
-    return interaction.update({
-      content: "❌ 次の状態データが見つかりません",
-      embeds: [],
-      components: []
-    });
-  }
+// ✅ confirm は先に処理
+if (nextStateId === "confirm") {
 
-  // confirm に入る場合
-  if (nextStateId === "confirm") {
+  const nextState = state; // confirmは今のstate.resultを使う
 
-    const template =
-      aki.confirmMessages[
-        Math.floor(Math.random() * aki.confirmMessages.length)
-      ];
+  const template =
+    aki.confirmMessages[
+      Math.floor(Math.random() * aki.confirmMessages.length)
+    ];
 
-    const message = template.replace("{result}", nextState.result);
+  const message = template.replace("{result}", nextState.result);
 
-    const embed = new EmbedBuilder()
-      .setTitle("📱 判定結果")
-      .setDescription(message)
-      .setColor(0xffcc00);
+  const embed = new EmbedBuilder()
+    .setTitle("📱 判定結果")
+    .setDescription(message)
+    .setColor(0xffcc00);
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel("はい")
-        .setStyle(ButtonStyle.Success)
-        .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
-      new ButtonBuilder()
-        .setLabel("いいえ")
-        .setStyle(ButtonStyle.Danger)
-        .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
-    );
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel("はい")
+      .setStyle(ButtonStyle.Success)
+      .setCustomId(`iphoneaki:confirm:yes:${ownerId}`),
+    new ButtonBuilder()
+      .setLabel("いいえ")
+      .setStyle(ButtonStyle.Danger)
+      .setCustomId(`iphoneaki:confirm:no:${ownerId}`)
+  );
 
-    return interaction.update({
-      embeds: [embed],
-      components: [row]
-    });
-  }
+  return interaction.update({
+    embeds: [embed],
+    components: [row]
+  });
+}
+
+// 通常ステート取得
+const nextState = aki.states[nextStateId];
+if (!nextState) {
+  return interaction.update({
+    content: "❌ 次の状態データが見つかりません",
+    embeds: [],
+    components: []
+  });
+}
 
   // 通常質問
   const embed = new EmbedBuilder()
