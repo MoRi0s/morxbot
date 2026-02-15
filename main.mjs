@@ -325,10 +325,29 @@ if (nextState.result) {
 // -------------------------
 // Basic message listener
 // -------------------------
-client.on('messageCreate', (msg) => {
-  if (msg.author.bot) return;
-  if (msg.content.toLowerCase() === 'ping') msg.reply('🏓 pong!');
+// -------------------------
+// Message dispatcher (all command modules対応)
+// -------------------------
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+
+  // 既存の ping 機能を残したいならここに書く
+  if (message.content.toLowerCase() === "ping") {
+    await message.reply("🏓 pong!");
+  }
+
+  // 各コマンドの messageCreate を実行
+  for (const command of client.commands.values()) {
+    if (typeof command.messageCreate === "function") {
+      try {
+        await command.messageCreate(message);
+      } catch (err) {
+        console.error(`messageCreate error in ${command.data?.name}`, err);
+      }
+    }
+  }
 });
+
 
 // -------------------------
 // Ready + Login
