@@ -1,4 +1,3 @@
-// commands/embedbuilder.js
 import {
   SlashCommandBuilder,
   EmbedBuilder,
@@ -7,109 +6,141 @@ import {
   ButtonStyle
 } from "discord.js";
 
+/* -----------------------
+   Embedカラー解析
+----------------------- */
 function parseColor(input) {
   if (!input) return 0x00ff00;
-
-  input = input.trim();
-
-  // #ffffff → 0xffffff
-  if (input.startsWith("#")) {
-    return parseInt(input.slice(1), 16);
-  }
-
-  // 0xffffff
-  if (input.startsWith("0x")) {
-    return parseInt(input, 16);
-  }
-
-  // 数字だけ
-  if (/^\d+$/.test(input)) {
-    return parseInt(input);
-  }
-
-  // 色名対応
-  const colorNames = {
-    red: 0xff0000,
-    blue: 0x0000ff,
-    green: 0x00ff00,
-    yellow: 0xffff00,
-    purple: 0x800080,
-    pink: 0xff69b4,
-    orange: 0xffa500,
-    black: 0x000000,
-    white: 0xffffff
-  };
-
-  return colorNames[input.toLowerCase()] || 0x00ff00;
+  if (input.startsWith("#")) return parseInt(input.slice(1), 16);
+  return parseInt(input) || 0x00ff00;
 }
 
+/* -----------------------
+   SlashCommand
+----------------------- */
 export const data = new SlashCommandBuilder()
   .setName("embedbuilder")
   .setDescription("埋め込みメッセージを作成")
+
   .addStringOption(opt =>
-    opt.setName("title")
-      .setDescription("タイトル")
-      .setRequired(true)
+    opt.setName("title").setDescription("タイトル").setRequired(true)
   )
   .addStringOption(opt =>
-    opt.setName("description")
-      .setDescription("本文")
-      .setRequired(true)
+    opt.setName("description").setDescription("本文").setRequired(true)
   )
   .addStringOption(opt =>
-    opt.setName("color")
-      .setDescription("カラー（#ff0000 / red など）")
-      .setRequired(false)
+    opt.setName("color").setDescription("Embedカラー(#ff0000)")
+  )
+
+  // ボタン1
+  .addStringOption(opt =>
+    opt.setName("button1_label").setDescription("ボタン1の名前")
   )
   .addStringOption(opt =>
-    opt.setName("button_label")
-      .setDescription("ボタンの表示名（任意）")
-      .setRequired(false)
+    opt.setName("button1_style")
+      .setDescription("ボタン1の色")
+      .addChoices(
+        { name: "青 (Primary)", value: "primary" },
+        { name: "緑 (Success)", value: "success" },
+        { name: "赤 (Danger)", value: "danger" },
+        { name: "灰 (Secondary)", value: "secondary" },
+        { name: "リンク (URL)", value: "link" }
+      )
   )
   .addStringOption(opt =>
-    opt.setName("button_url")
-      .setDescription("ボタンのリンクURL（任意）")
-      .setRequired(false)
+    opt.setName("button1_url").setDescription("URL（link選択時のみ）")
+  )
+
+  // ボタン2
+  .addStringOption(opt =>
+    opt.setName("button2_label").setDescription("ボタン2の名前")
+  )
+  .addStringOption(opt =>
+    opt.setName("button2_style")
+      .setDescription("ボタン2の色")
+      .addChoices(
+        { name: "青 (Primary)", value: "primary" },
+        { name: "緑 (Success)", value: "success" },
+        { name: "赤 (Danger)", value: "danger" },
+        { name: "灰 (Secondary)", value: "secondary" },
+        { name: "リンク (URL)", value: "link" }
+      )
+  )
+  .addStringOption(opt =>
+    opt.setName("button2_url").setDescription("URL（link選択時のみ）")
   );
 
+/* -----------------------
+   Execute
+----------------------- */
 export async function execute(interaction) {
 
   const title = interaction.options.getString("title");
   const description = interaction.options.getString("description");
   const colorInput = interaction.options.getString("color");
 
-  const buttonLabel = interaction.options.getString("button_label");
-  const buttonUrl = interaction.options.getString("button_url");
-
   const embed = new EmbedBuilder()
     .setTitle(title)
     .setDescription(description)
     .setColor(parseColor(colorInput));
 
-  // ボタン処理
-  if (buttonLabel && buttonUrl) {
+  const row = new ActionRowBuilder();
 
-    if (!buttonUrl.startsWith("http://") && !buttonUrl.startsWith("https://")) {
-      return interaction.reply({
-        content: "❌ URLは http:// または https:// で始めてください",
-        ephemeral: true
-      });
+  // ボタン生成関数
+  function createButton(label, styleInput, url) {
+    if (!label) return null;
+
+    const styleMap = {
+      primary: ButtonStyle.Primary,
+      success: ButtonStyle.Success,
+      danger: ButtonStyle.Danger,
+      secondary: ButtonStyle.Secondary,
+      link: ButtonStyle.Link
+    };
+
+    const style = styleMap[styleInput] || ButtonStyle.Primary;
+
+    const button = new ButtonBuilder()
+      .setLabel(label)
+      .setStyle(style);
+
+    if (style === ButtonStyle.Link) {
+      if (!url || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+        return null;
+      }
+      button.setURL(url);
+    } else {
+      button.setCustomId(`embedbtn_${Date.now()}_${Math.random()}`);
     }
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel(buttonLabel)
-        .setStyle(ButtonStyle.Link)
-        .setURL(buttonUrl)
-    );
+    return button;
+  }
 
-    return interaction.reply({
+  // ボタン1
+  const btn1 = createButton(
+    interaction.options.getString("button1_label"),
+    interaction.options.getString("button1_style"),
+    interaction.options.getString("button1_url")
+  );
+
+  // ボタン2
+  const btn2 = createButton(
+    interaction.options.getString("button2_label"),
+    interaction.options.getString("button2_style"),
+    interaction.options.getString("button2_url")
+  );
+
+  if (btn1) row.addComponents(btn1);
+  if (btn2) row.addComponents(btn2);
+
+  if (row.components.length > 0) {
+    await interaction.reply({
       embeds: [embed],
       components: [row]
     });
+  } else {
+    await interaction.reply({
+      embeds: [embed]
+    });
   }
-
-  await interaction.reply({
-    embeds: [embed]
-  });
 }
