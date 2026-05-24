@@ -53,6 +53,7 @@
     "iphoneair":{ "result": "iPhone Air" },
     "iphone17pro":{ "result": "iPhone 17 Pro" },
     "iphone17promax":{ "result": "iPhone 17 Pro Max" },
+    "iphone17e":{ "result": "iPhone 17e" },
 
 
 
@@ -315,9 +316,20 @@
       "question": "カメラコントロール（側面にあるカメラ操作するやつ）がある？",
       "options": {
         "はい": "iphoneair",
+        "いいえ": "iphone16eor17e"
+      }
+    },
+
+    "iphone16eor17e": {
+      "question": "MagSafe充電に対応している？(背面が磁石にくっつく？)",
+      "options": {
+        "はい": "iphone17e",
         "いいえ": "iphone16e"
       }
     },
+
+
+
 
     "flat_cam_2": {
       "question": "背面のカメラは2つ？",
