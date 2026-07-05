@@ -111,28 +111,23 @@ client.on("interactionCreate", async (interaction) => {
     // slash command
     // ======================
     if (interaction.isChatInputCommand()) {
+  const cmd = client.commands.get(interaction.commandName);
+  return cmd.execute(interaction, context);
+}
 
-      const command = client.commands.get(interaction.commandName);
-      if (!command) return;
+if (interaction.isButton()) {
+  if (!interaction.customId.startsWith("changeRole|")) return;
 
-      return await command.execute(interaction, context);
-    }
+  const cmd = client.commands.get("changerole");
+  return cmd.handleButton(interaction, context);
+}
 
-    // ======================
-    // changerole BUTTON
-    // ======================
-    if (interaction.isButton() && interaction.customId?.startsWith("changeRole|")) {
+if (interaction.isModalSubmit()) {
+  if (!interaction.customId.startsWith("changeRole|")) return;
 
-      const command = client.commands.get("changerole");
-      if (!command) return;
-
-      // 🔥重要：これで「二重呼び防止」
-      return await command.execute(interaction, context);
-    }
-
-    // ======================
-    // changerole MODAL
-    // ======================
+  const cmd = client.commands.get("changerole");
+  return cmd.handleModal(interaction, context);
+}
 
 
     // ======================
