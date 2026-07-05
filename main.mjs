@@ -310,3 +310,14 @@ client.on("interactionCreate", async (interaction) => {
 // login
 // =========================
 client.login(process.env.DISCORD_TOKEN);
+
+
+const port = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+  res.send("Bot is running");
+});
+
+app.listen(port, () => {
+  console.log("Listening on port", port);
+});
