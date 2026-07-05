@@ -122,25 +122,18 @@ export async function execute(interaction, client) {
 
             let member = null;
 
-            // ======================
-            // ID検索
-            // ======================
+            // ①ID
             if (/^\d{17,20}$/.test(userInput)) {
                 member = await interaction.guild.members.fetch(userInput).catch(() => null);
             }
 
-            // ======================
-            // username / displayName / tag
-            // ======================
+            // ②軽量検索（全部fetchしない）
             if (!member) {
-                const members = await interaction.guild.members.fetch();
-
                 const inputLower = userInput.toLowerCase();
 
-                member = members.find(m =>
-                    m.user.username.toLowerCase() === inputLower ||
-                    m.displayName.toLowerCase() === inputLower ||
-                    m.user.tag?.toLowerCase() === inputLower
+                member = interaction.guild.members.cache.find(m =>
+                    m.user.username?.toLowerCase() === inputLower ||
+                    m.displayName?.toLowerCase() === inputLower
                 );
             }
 
@@ -155,7 +148,7 @@ export async function execute(interaction, client) {
             // ======================
             for (const id of removeIds) {
                 if (member.roles.cache.has(id)) {
-                    await member.roles.remove(id).catch(() => {});
+                    await member.roles.remove(id).catch(() => { });
                 }
             }
 
@@ -164,7 +157,7 @@ export async function execute(interaction, client) {
             // ======================
             for (const id of addIds) {
                 if (!member.roles.cache.has(id)) {
-                    await member.roles.add(id).catch(() => {});
+                    await member.roles.add(id).catch(() => { });
                 }
             }
 
@@ -182,7 +175,7 @@ export async function execute(interaction, client) {
             return interaction.reply({
                 content: "❌ エラー発生",
                 flags: 64
-            }).catch(() => {});
+            }).catch(() => { });
         }
     }
 }
