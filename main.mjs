@@ -109,24 +109,95 @@ const context = {
 
 client.on("interactionCreate", async (interaction) => {
 
-if (interaction.isChatInputCommand()) {
+  // ======================
+  // スラッシュコマンド
+  // ======================
 
-    const command = client.commands.get(interaction.commandName);
+  if (interaction.isChatInputCommand()) {
+
+    const command = client.commands.get(
+      interaction.commandName
+    );
+
     if (!command) return;
 
     try {
-      await command.execute(interaction, context);
-    } catch (error) {
-      console.error("Command error:", error);
 
-      if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ content: "❌ エラーが発生しました" });
+      await command.execute(
+        interaction,
+        context
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Command error:",
+        error
+      );
+
+      if (
+        interaction.deferred ||
+        interaction.replied
+      ) {
+
+        await interaction.editReply({
+          content:"❌ エラーが発生しました"
+        });
+
       } else {
-        await interaction.reply({ content: "❌ エラーが発生しました", flags: 64 });
+
+        await interaction.reply({
+          content:"❌ エラーが発生しました",
+          flags:64
+        });
+
       }
+
     }
 
-    return; // ← これ超重要
+    return;
+
+  }
+
+
+  // ======================
+  // changerole ボタン/モーダル
+  // ======================
+
+  if(
+    (
+      interaction.isButton() ||
+      interaction.isModalSubmit()
+    ) &&
+    interaction.customId?.startsWith(
+      "changeRole|"
+    )
+  ){
+
+    const command =
+    client.commands.get(
+      "changerole"
+    );
+
+    if(command){
+
+      try{
+
+        await command.execute(
+          interaction,
+          context
+        );
+
+      }catch(err){
+
+        console.error(err);
+
+      }
+
+    }
+
+    return;
+
   }
 
   if (!interaction.isButton()) return;
