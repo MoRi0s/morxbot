@@ -10,21 +10,29 @@ import {
 } from "discord.js";
 
 // ======================
-// Slash
+// Slash Command（5個ずつ）
 // ======================
 export const data = new SlashCommandBuilder()
     .setName("changerole")
-    .setDescription("複数ロール変更")
-    .addRoleOption(opt =>
-        opt.setName("addrole1")
-            .setDescription("付与ロール")
-            .setRequired(true)
-    )
-    .addRoleOption(opt =>
-        opt.setName("removerole1")
-            .setDescription("削除ロール")
+    .setDescription("複数ロール変更");
+
+// 付与ロール（5個）
+for (let i = 1; i <= 5; i++) {
+    data.addRoleOption(opt =>
+        opt.setName(`addrole${i}`)
+            .setDescription(`付与ロール${i}`)
+            .setRequired(i === 1)
+    );
+}
+
+// 削除ロール（5個）
+for (let i = 1; i <= 5; i++) {
+    data.addRoleOption(opt =>
+        opt.setName(`removerole${i}`)
+            .setDescription(`削除ロール${i}`)
             .setRequired(false)
     );
+}
 
 // ======================
 // SLASH ONLY
@@ -38,24 +46,34 @@ export async function execute(interaction) {
         });
     }
 
-    const add = interaction.options.getRole("addrole1");
-    const remove = interaction.options.getRole("removerole1");
+    const addIds = [];
+    const removeIds = [];
+
+    // 付与ロールまとめ
+    for (let i = 1; i <= 5; i++) {
+        const role = interaction.options.getRole(`addrole${i}`);
+        if (role) addIds.push(role.id);
+    }
+
+    // 削除ロールまとめ
+    for (let i = 1; i <= 5; i++) {
+        const role = interaction.options.getRole(`removerole${i}`);
+        if (role) removeIds.push(role.id);
+    }
 
     const button = new ButtonBuilder()
-        .setCustomId(`changeRole|${add?.id || ""}|${remove?.id || ""}`)
+        .setCustomId(`changeRole|${addIds.join(",")}|${removeIds.join(",")}`)
         .setLabel("ロール変更")
         .setStyle(ButtonStyle.Primary);
 
-    const row = new ActionRowBuilder().addComponents(button);
-
     return interaction.reply({
         content: "👇 ボタンを押してください",
-        components: [row]
+        components: [new ActionRowBuilder().addComponents(button)]
     });
 }
 
 // ======================
-// BUTTON ONLY
+// BUTTON
 // ======================
 export async function handleButton(interaction) {
 
@@ -69,15 +87,15 @@ export async function handleButton(interaction) {
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-    modal.addComponents(
-        new ActionRowBuilder().addComponents(input)
-    );
-
-    return interaction.showModal(modal);
+    return interaction.showModal(
+        new ActionRowBuilder().addComponents(
+            input
+        )
+    ).catch(() => {});
 }
 
 // ======================
-// MODAL ONLY
+// MODAL
 // ======================
 export async function handleModal(interaction) {
 
@@ -90,19 +108,17 @@ export async function handleModal(interaction) {
         const addIds = parts[1] ? parts[1].split(",").filter(Boolean) : [];
         const removeIds = parts[2] ? parts[2].split(",").filter(Boolean) : [];
 
-        const userInput = interaction.fields
-            .getTextInputValue("userInput")
-            .trim()
-            .replace(/[<@!>]/g, "");
+        const raw = interaction.fields.getTextInputValue("userInput");
+        const userInput = raw.trim().replace(/[<@!>]/g, "");
 
         let member = null;
 
-        // ID
+        // ID検索
         if (/^\d{17,20}$/.test(userInput)) {
             member = await interaction.guild.members.fetch(userInput).catch(() => null);
         }
 
-        // username / displayName
+        // 名前検索（軽量）
         if (!member) {
             const input = userInput.toLowerCase();
 
@@ -116,10 +132,12 @@ export async function handleModal(interaction) {
             return interaction.editReply("❌ ユーザーが見つかりません");
         }
 
+        // ロール削除
         for (const id of removeIds) {
             await member.roles.remove(id).catch(() => {});
         }
 
+        // ロール追加
         for (const id of addIds) {
             await member.roles.add(id).catch(() => {});
         }
@@ -130,7 +148,6 @@ export async function handleModal(interaction) {
 
     } catch (err) {
         console.error(err);
-
         return interaction.editReply("❌ エラー発生").catch(() => {});
     }
 }
