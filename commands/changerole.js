@@ -18,8 +18,7 @@ const command = new SlashCommandBuilder()
 
 for (let i = 1; i <= 10; i++) {
     command.addRoleOption(opt =>
-        opt
-            .setName(`addrole${i}`)
+        opt.setName(`addrole${i}`)
             .setDescription(`付与ロール${i}`)
             .setRequired(i === 1)
     );
@@ -27,8 +26,7 @@ for (let i = 1; i <= 10; i++) {
 
 for (let i = 1; i <= 10; i++) {
     command.addRoleOption(opt =>
-        opt
-            .setName(`removerole${i}`)
+        opt.setName(`removerole${i}`)
             .setDescription(`削除ロール${i}`)
             .setRequired(false)
     );
@@ -41,7 +39,7 @@ export const data = command;
 // ======================
 export async function execute(interaction, client) {
 
-    console.log("changerole:", interaction.type, interaction.customId, interaction.commandName);
+    console.log("changerole:", interaction.type, interaction.customId);
 
     // ======================
     // SLASH
@@ -67,13 +65,18 @@ export async function execute(interaction, client) {
         }
 
         const button = new ButtonBuilder()
-            .setCustomId(`changeRole|${addRoles.join(",")}|${removeRoles.join(",")}`)
+            .setCustomId(`changeRole`)
             .setLabel("ロール変更")
             .setStyle(ButtonStyle.Primary);
 
+        client.changeRoleData ??= new Map();
+        client.changeRoleData.set(interaction.user.id, {
+            addRoles,
+            removeRoles
+        });
+
         const row = new ActionRowBuilder().addComponents(button);
 
-        // ★全員に見えるように ephemeral削除
         return interaction.reply({
             content: "👇 ボタンを押してください",
             components: [row]
@@ -83,10 +86,10 @@ export async function execute(interaction, client) {
     // ======================
     // BUTTON → MODAL
     // ======================
-    if (interaction.isButton() && interaction.customId.startsWith("changeRole|")) {
+    if (interaction.isButton() && interaction.customId === "changeRole") {
 
         const modal = new ModalBuilder()
-            .setCustomId(interaction.customId)
+            .setCustomId("changeRoleModal")
             .setTitle("ロール変更");
 
         const input = new TextInputBuilder()
@@ -95,25 +98,27 @@ export async function execute(interaction, client) {
             .setStyle(TextInputStyle.Short)
             .setRequired(true);
 
-        const row = new ActionRowBuilder().addComponents(input);
-        modal.addComponents(row);
+        modal.addComponents(
+            new ActionRowBuilder().addComponents(input)
+        );
 
         return interaction.showModal(modal);
     }
 
     // ======================
-    // MODAL SUBMIT
+    // MODAL
     // ======================
-    if (interaction.isModalSubmit() && interaction.customId.startsWith("changeRole|")) {
+    if (interaction.isModalSubmit() && interaction.customId === "changeRoleModal") {
 
         try {
 
             await interaction.deferReply({ flags: 64 });
 
-            const parts = interaction.customId.split("|");
+            const data = client.changeRoleData?.get(interaction.user.id);
 
-            const addIds = parts[1] ? parts[1].split(",").filter(Boolean) : [];
-            const removeIds = parts[2] ? parts[2].split(",").filter(Boolean) : [];
+            if (!data) {
+                return interaction.editReply("❌ データが失われました。もう一度実行してください");
+            }
 
             const userInput = interaction.fields
                 .getTextInputValue("userInput")
@@ -122,60 +127,57 @@ export async function execute(interaction, client) {
 
             let member = null;
 
-            // ①ID
+            // ======================
+            // ID
+            // ======================
             if (/^\d{17,20}$/.test(userInput)) {
                 member = await interaction.guild.members.fetch(userInput).catch(() => null);
             }
 
-            // ②軽量検索（全部fetchしない）
+            // ======================
+            // cache + fallback fetch
+            // ======================
             if (!member) {
                 const inputLower = userInput.toLowerCase();
 
-                member = interaction.guild.members.cache.find(m =>
-                    m.user.username?.toLowerCase() === inputLower ||
-                    m.displayName?.toLowerCase() === inputLower
-                );
+                member =
+                    interaction.guild.members.cache.find(m =>
+                        m.user.username?.toLowerCase() === inputLower ||
+                        m.displayName?.toLowerCase() === inputLower
+                    ) ||
+                    await interaction.guild.members.fetch()
+                        .then(members =>
+                            members.find(m =>
+                                m.user.username?.toLowerCase() === inputLower ||
+                                m.displayName?.toLowerCase() === inputLower
+                            )
+                        )
+                        .catch(() => null);
             }
 
             if (!member) {
-                return interaction.editReply({
-                    content: "❌ ユーザーが見つかりません（ID / username / 表示名を確認）"
-                });
+                return interaction.editReply("❌ ユーザーが見つかりません");
             }
 
             // ======================
-            // ロール削除
+            // REMOVE
             // ======================
-            for (const id of removeIds) {
-                if (member.roles.cache.has(id)) {
-                    await member.roles.remove(id).catch(() => { });
-                }
+            for (const id of data.removeRoles) {
+                await member.roles.remove(id).catch(() => {});
             }
 
             // ======================
-            // ロール追加
+            // ADD
             // ======================
-            for (const id of addIds) {
-                if (!member.roles.cache.has(id)) {
-                    await member.roles.add(id).catch(() => { });
-                }
+            for (const id of data.addRoles) {
+                await member.roles.add(id).catch(() => {});
             }
 
-            return interaction.editReply({
-                content: `✅ ${member.user.tag} のロール更新完了`
-            });
+            return interaction.editReply(`✅ ${member.user.tag} のロール更新完了`);
 
         } catch (err) {
             console.error(err);
-
-            if (interaction.deferred || interaction.replied) {
-                return interaction.editReply("❌ エラー発生");
-            }
-
-            return interaction.reply({
-                content: "❌ エラー発生",
-                flags: 64
-            }).catch(() => { });
+            return interaction.editReply("❌ エラー発生");
         }
     }
 }
