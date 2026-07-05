@@ -10,13 +10,13 @@ import {
 } from "discord.js";
 
 // ======================
-// Slash Command（5個ずつ）
+// Slash Command（5個）
 // ======================
 export const data = new SlashCommandBuilder()
     .setName("changerole")
     .setDescription("複数ロール変更");
 
-// 付与ロール（5個）
+// 付与ロール（最大5）
 for (let i = 1; i <= 5; i++) {
     data.addRoleOption(opt =>
         opt.setName(`addrole${i}`)
@@ -25,7 +25,7 @@ for (let i = 1; i <= 5; i++) {
     );
 }
 
-// 削除ロール（5個）
+// 削除ロール（最大5）
 for (let i = 1; i <= 5; i++) {
     data.addRoleOption(opt =>
         opt.setName(`removerole${i}`)
@@ -35,7 +35,7 @@ for (let i = 1; i <= 5; i++) {
 }
 
 // ======================
-// SLASH ONLY
+// SLASH
 // ======================
 export async function execute(interaction) {
 
@@ -49,13 +49,11 @@ export async function execute(interaction) {
     const addIds = [];
     const removeIds = [];
 
-    // 付与ロールまとめ
     for (let i = 1; i <= 5; i++) {
         const role = interaction.options.getRole(`addrole${i}`);
         if (role) addIds.push(role.id);
     }
 
-    // 削除ロールまとめ
     for (let i = 1; i <= 5; i++) {
         const role = interaction.options.getRole(`removerole${i}`);
         if (role) removeIds.push(role.id);
@@ -68,7 +66,9 @@ export async function execute(interaction) {
 
     return interaction.reply({
         content: "👇 ボタンを押してください",
-        components: [new ActionRowBuilder().addComponents(button)]
+        components: [
+            new ActionRowBuilder().addComponents(button)
+        ]
     });
 }
 
@@ -87,11 +87,11 @@ export async function handleButton(interaction) {
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-    return interaction.showModal(
-        new ActionRowBuilder().addComponents(
-            input
-        )
-    ).catch(() => {});
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(input)
+    );
+
+    return interaction.showModal(modal);
 }
 
 // ======================
@@ -105,11 +105,18 @@ export async function handleModal(interaction) {
 
         const parts = interaction.customId.split("|");
 
-        const addIds = parts[1] ? parts[1].split(",").filter(Boolean) : [];
-        const removeIds = parts[2] ? parts[2].split(",").filter(Boolean) : [];
+        const addIds = parts[1]
+            ? parts[1].split(",").filter(Boolean)
+            : [];
 
-        const raw = interaction.fields.getTextInputValue("userInput");
-        const userInput = raw.trim().replace(/[<@!>]/g, "");
+        const removeIds = parts[2]
+            ? parts[2].split(",").filter(Boolean)
+            : [];
+
+        const userInput = interaction.fields
+            .getTextInputValue("userInput")
+            .trim()
+            .replace(/[<@!>]/g, "");
 
         let member = null;
 
@@ -118,7 +125,7 @@ export async function handleModal(interaction) {
             member = await interaction.guild.members.fetch(userInput).catch(() => null);
         }
 
-        // 名前検索（軽量）
+        // username / displayName検索
         if (!member) {
             const input = userInput.toLowerCase();
 
@@ -132,12 +139,12 @@ export async function handleModal(interaction) {
             return interaction.editReply("❌ ユーザーが見つかりません");
         }
 
-        // ロール削除
+        // 削除
         for (const id of removeIds) {
             await member.roles.remove(id).catch(() => {});
         }
 
-        // ロール追加
+        // 追加
         for (const id of addIds) {
             await member.roles.add(id).catch(() => {});
         }
@@ -148,6 +155,7 @@ export async function handleModal(interaction) {
 
     } catch (err) {
         console.error(err);
+
         return interaction.editReply("❌ エラー発生").catch(() => {});
     }
 }
