@@ -99,11 +99,158 @@ const context = {
 };
 
 // =========================
+// AutoBan Leave
+// =========================
+
+const ROLE_CACHE = path.join(context.dataDir, "memberRoles.json");
+const CONFIG_FILE = path.join(context.dataDir, "autobanleave.json");
+
+function loadJson(file) {
+  if (!fs.existsSync(file)) return {};
+
+  return JSON.parse(
+    fs.readFileSync(file, "utf8")
+  );
+}
+
+function saveJson(file, data) {
+  fs.writeFileSync(
+    file,
+    JSON.stringify(data, null, 2)
+  );
+}
+
+// メンバー参加
+client.on("guildMemberAdd", (member) => {
+
+  const data = loadJson(ROLE_CACHE);
+
+  data[member.id] = {
+    roles: [...member.roles.cache.keys()]
+  };
+
+  saveJson(ROLE_CACHE, data);
+
+});
+
+// ロール更新
+client.on(
+  "guildMemberUpdate",
+  (oldMember, newMember) => {
+
+    const data = loadJson(ROLE_CACHE);
+
+    data[newMember.id] = {
+      roles: [...newMember.roles.cache.keys()]
+    };
+
+    saveJson(ROLE_CACHE, data);
+
+  }
+);
+
+// 自主退出検知
+client.on(
+  "guildMemberRemove",
+  async (member) => {
+
+    try {
+
+      const config = loadJson(CONFIG_FILE);
+
+      const guildConfig =
+        config[member.guild.id];
+
+      if (
+        !guildConfig ||
+        !guildConfig.enabled
+      ) return;
+
+      // 少し待って監査ログ反映
+      await new Promise(
+        r => setTimeout(r, 3000)
+      );
+
+      // キック判定
+      const logs =
+        await member.guild.fetchAuditLogs({
+          type: 20,
+          limit: 5
+        });
+
+      const kicked =
+        logs.entries.find(
+          e =>
+            e.target?.id === member.id &&
+            Date.now() -
+            e.createdTimestamp < 5000
+        );
+
+      if (kicked) {
+        console.log(
+          "キックなのでBANしない"
+        );
+        return;
+      }
+
+      const cache =
+        loadJson(ROLE_CACHE);
+
+      const savedRoles =
+        cache[member.id]?.roles || [];
+
+      const excluded =
+        savedRoles.some(
+          role =>
+            guildConfig.excludes.includes(
+              role
+            )
+        );
+
+      if (excluded) {
+
+        console.log(
+          "除外ロールなので無視"
+        );
+
+        return;
+      }
+
+      await member.guild.members.ban(
+        member.id,
+        {
+          reason: "自主退出自動BAN"
+        }
+      );
+
+      console.log(
+        `${member.user.tag} 自動BAN`
+      );
+
+    } catch (err) {
+
+      console.error(
+        "AutoBan:",
+        err
+      );
+
+    }
+
+  }
+);
+
+
+// =========================
 // INTERACTION CREATE
 // =========================
 client.on("interactionCreate", async (interaction) => {
 
-  console.log("受信:", interaction.type, interaction.customId, interaction.commandName);
+  console.log(
+    "受信:",
+    interaction.type,
+    interaction.customId,
+    interaction.commandName
+  );
 
   try {
 
@@ -111,23 +258,65 @@ client.on("interactionCreate", async (interaction) => {
     // slash command
     // ======================
     if (interaction.isChatInputCommand()) {
-  const cmd = client.commands.get(interaction.commandName);
-  return cmd.execute(interaction, context);
-}
 
-if (interaction.isButton()) {
-  if (!interaction.customId.startsWith("changeRole|")) return;
+      const cmd = client.commands.get(
+        interaction.commandName
+      );
 
-  const cmd = client.commands.get("changerole");
-  return cmd.handleButton(interaction, context);
-}
+      if (!cmd) return;
 
-if (interaction.isModalSubmit()) {
-  if (!interaction.customId.startsWith("changeRole|")) return;
+      await cmd.execute(
+        interaction,
+        context
+      );
 
-  const cmd = client.commands.get("changerole");
-  return cmd.handleModal(interaction, context);
-}
+      return;
+    }
+
+
+    // ======================
+    // changerole BUTTON
+    // ======================
+    if (
+      interaction.isButton() &&
+      interaction.customId?.startsWith("changeRole|")
+    ) {
+
+      const cmd =
+        client.commands.get("changerole");
+
+      if (!cmd?.handleButton) return;
+
+      await cmd.handleButton(
+        interaction,
+        context
+      );
+
+      return;
+    }
+
+
+    // ======================
+    // changerole MODAL
+    // ======================
+    if (
+      interaction.isModalSubmit() &&
+      interaction.customId?.startsWith("changeRole|")
+    ) {
+
+      const cmd =
+        client.commands.get("changerole");
+
+      if (!cmd?.handleModal) return;
+
+      await cmd.handleModal(
+        interaction,
+        context
+      );
+
+      return;
+    }
+
 
 
     // ======================
@@ -298,10 +487,34 @@ if (interaction.isModalSubmit()) {
       });
     }
 
-  } catch (error) {
-    console.error("❌ Discord error:", error);
   }
+  catch(error){
+
+    console.error(
+      "❌ Discord error:",
+      error
+    );
+
+    // 二重返信防止
+    if (
+      !interaction.replied &&
+      !interaction.deferred
+    ) {
+
+      await interaction.reply({
+        content:"❌ エラー発生",
+        flags:64
+      }).catch(()=>{});
+
+    }
+  }
+
 });
+
+
+
+
+
 // =========================
 // login
 // =========================
