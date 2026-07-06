@@ -392,7 +392,7 @@ client.on("interactionCreate", async (interaction) => {
             embeds: [
               new EmbedBuilder()
                 .setTitle("🎉 やったー！")
-                .setDescription(`君のiPhoneは${model}`)
+                .setDescription(`( ˶¯ ꒳¯˵)⟡ふふ〜ん！特定完了〜！君のiPhoneは${model}なんだね！✨`)
                 .setColor(0x00ff00)
             ],
             components: []
