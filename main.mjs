@@ -136,7 +136,7 @@ if(fs.existsSync(flagFile)){
 
 if(flagConfig.globalCommand){
 
-
+  console.log("START GLOBAL REGISTER");
     // --------------------------
     // GLOBAL登録
     // --------------------------
