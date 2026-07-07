@@ -60,11 +60,9 @@ for (const file of commandFiles) {
     const full = path.join(commandsDir, file);
 
 
- console.log("Import start:", file);
 
-const mod = await import(pathToFileURL(full).href);
+    const mod = await import(pathToFileURL(full).href);
 
-console.log("Import done:", file);
 
     if (!mod?.data || !mod?.execute) continue;
 
@@ -83,13 +81,13 @@ console.log("Import done:", file);
 // Slash register
 // -------------------------
 const rest = new REST({ version: "10" })
-    .setToken(process.env.DISCORD_TOKEN);
+  .setToken(process.env.DISCORD_TOKEN);
 
 
 const flagFile = path.join(
-    __dirname,
-    "data",
-    "flag.json"
+  __dirname,
+  "data",
+  "flag.json"
 );
 
 
@@ -98,32 +96,32 @@ console.log("flag exists:", fs.existsSync(flagFile));
 
 
 let flagConfig = {
-    globalCommand: false
+  globalCommand: false
 };
 
 
 // flag.json読み込み
 
-if(fs.existsSync(flagFile)){
+if (fs.existsSync(flagFile)) {
 
-    try {
+  try {
 
-        flagConfig =
-            JSON.parse(
-                fs.readFileSync(
-                    flagFile,
-                    "utf8"
-                )
-            );
+    flagConfig =
+      JSON.parse(
+        fs.readFileSync(
+          flagFile,
+          "utf8"
+        )
+      );
 
-    } catch(err){
+  } catch (err) {
 
-        console.error(
-            "flag.json error:",
-            err
-        );
+    console.error(
+      "flag.json error:",
+      err
+    );
 
-    }
+  }
 
 }
 
@@ -132,8 +130,8 @@ if(fs.existsSync(flagFile)){
 // login
 // =========================
 client.once("clientReady", () => {
-    console.log(`✅ Logged in as ${client.user.tag}`);
-    console.log(`📦 Commands: ${client.commands.size}`);
+  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`📦 Commands: ${client.commands.size}`);
 });
 
 console.log("Before login");
@@ -184,141 +182,141 @@ app.listen(port, () => {
 // ==========================
 
 
-if(flagConfig.globalCommand){
+if (flagConfig.globalCommand) {
 
   console.log("START GLOBAL REGISTER");
-    // --------------------------
-    // GLOBAL登録
-    // --------------------------
+  // --------------------------
+  // GLOBAL登録
+  // --------------------------
 
-    try {
+  try {
 
-        await rest.put(
+    await rest.put(
 
-            Routes.applicationCommands(
-                process.env.CLIENT_ID
-            ),
+      Routes.applicationCommands(
+        process.env.CLIENT_ID
+      ),
 
-            {
-                body: commandsForRegister
-            }
+      {
+        body: commandsForRegister
+      }
 
-        );
-
-
-        console.log(
-            "Registered: GLOBAL COMMAND"
-        );
+    );
 
 
-    } catch(e){
-
-        console.error(
-            "Global register error:",
-            e
-        );
-
-    }
+    console.log(
+      "Registered: GLOBAL COMMAND"
+    );
 
 
+  } catch (e) {
 
-}else{
+    console.error(
+      "Global register error:",
+      e
+    );
 
-
-    // --------------------------
-    // GLOBAL削除
-    // --------------------------
-
-    try {
-
-        await rest.put(
-
-            Routes.applicationCommands(
-                process.env.CLIENT_ID
-            ),
-
-            {
-                body:[]
-            }
-
-        );
-
-
-        console.log(
-            "Deleted: GLOBAL COMMAND"
-        );
-
-
-    } catch(e){
-
-        console.error(
-            "Global delete error:",
-            e
-        );
-
-    }
+  }
 
 
 
-    // --------------------------
-    // GUILD登録
-    // --------------------------
+} else {
 
-    const guildIds =
-        process.env.GUILD_IDS
-        .split(",")
-        .map(g => g.trim());
 
-        console.log(
+  // --------------------------
+  // GLOBAL削除
+  // --------------------------
+
+  try {
+
+    await rest.put(
+
+      Routes.applicationCommands(
+        process.env.CLIENT_ID
+      ),
+
+      {
+        body: []
+      }
+
+    );
+
+
+    console.log(
+      "Deleted: GLOBAL COMMAND"
+    );
+
+
+  } catch (e) {
+
+    console.error(
+      "Global delete error:",
+      e
+    );
+
+  }
+
+
+
+  // --------------------------
+  // GUILD登録
+  // --------------------------
+
+  const guildIds =
+    process.env.GUILD_IDS
+      .split(",")
+      .map(g => g.trim());
+
+  console.log(
     `📡 Local Guild Count: ${guildIds.length}`
-);
+  );
 
 
 
 
-    for(const guildId of guildIds){
+  for (const guildId of guildIds) {
 
-        try {
-
-
-            await rest.put(
-
-                Routes.applicationGuildCommands(
-                    process.env.CLIENT_ID,
-                    guildId
-                ),
-
-                {
-                    body: commandsForRegister
-                }
-
-            );
+    try {
 
 
-            console.log(
-                "Registered:",
-                guildId
-            );
+      await rest.put(
 
+        Routes.applicationGuildCommands(
+          process.env.CLIENT_ID,
+          guildId
+        ),
 
-        }catch(e){
-
-            console.error(
-                "Guild register error:",
-                guildId,
-                e
-            );
-
+        {
+          body: commandsForRegister
         }
 
+      );
+
+
+      console.log(
+        "Registered:",
+        guildId
+      );
+
+
+    } catch (e) {
+
+      console.error(
+        "Guild register error:",
+        guildId,
+        e
+      );
+
     }
+
+  }
 
 }
 
 
 console.log(
-    "FLAG:",
-    flagConfig.globalCommand
+  "FLAG:",
+  flagConfig.globalCommand
 );
 
 // -------------------------
@@ -672,7 +670,7 @@ client.on("interactionCreate", async (interaction) => {
 
         const template =
           aki.confirmMessages[
-            Math.floor(Math.random() * aki.confirmMessages.length)
+          Math.floor(Math.random() * aki.confirmMessages.length)
           ];
 
         const message = template.replace("{result}", nextState.result);
@@ -721,7 +719,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
   }
-  catch(error){
+  catch (error) {
 
     console.error(
       "❌ Discord error:",
@@ -735,9 +733,9 @@ client.on("interactionCreate", async (interaction) => {
     ) {
 
       await interaction.reply({
-        content:"❌ エラー発生",
-        flags:64
-      }).catch(()=>{});
+        content: "❌ エラー発生",
+        flags: 64
+      }).catch(() => { });
 
     }
   }

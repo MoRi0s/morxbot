@@ -6,6 +6,8 @@ import {
 import fs from "fs";
 import path from "path";
 
+export const category = "Dangerous";
+export const permissionLevel = 3;
 
 export const data = new SlashCommandBuilder()
 

@@ -2,6 +2,9 @@
 import { SlashCommandBuilder } from "discord.js";
 import { joinVoiceChannel } from "@discordjs/voice";
 
+export const category = "Music";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
     .setName("vcjoin")
     .setDescription("Bot をVCに参加させる");

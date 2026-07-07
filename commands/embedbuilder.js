@@ -6,6 +6,10 @@ import {
   ButtonStyle
 } from "discord.js";
 
+
+export const category = "Useful";
+export const permissionLevel = 1;
+
 /* -----------------------
    Embedカラー解析
 ----------------------- */

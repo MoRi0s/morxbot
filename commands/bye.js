@@ -6,6 +6,8 @@ import {
 import fs from "fs";
 import path from "path";
 
+export const category = "Moderation";
+export const permissionLevel = 3;
 
 export const data = new SlashCommandBuilder()
 
@@ -64,18 +66,14 @@ export async function execute(interaction, context) {
 
 
 
-    const hasAdminRole =
-        interaction.member.roles.cache.some(role =>
-            config.adminRoles?.includes(role.id)
-        );
 
 
 
-    if(!isAdmin && !hasAdminRole){
+    if(!isAdmin ){
 
         return interaction.reply({
             content:
-            "❌ 管理者または設定された管理ロールのみ使用可能です",
+            "❌ 管理者のみ使用可能です",
             flags:64
         });
 

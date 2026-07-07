@@ -6,6 +6,8 @@ import {
 import fs from "fs";
 import path from "path";
 
+export const category = "Moderation";
+export const permissionLevel = 2;
 
 export const data = new SlashCommandBuilder()
 

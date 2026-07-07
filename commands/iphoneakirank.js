@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 
+export const category = "Game";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
   .setName("iphoneakirank")
   .setDescription("iPhoneアキネーターの機種別ランキングを表示します");

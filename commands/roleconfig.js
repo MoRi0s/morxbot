@@ -5,6 +5,9 @@ import {
     PermissionsBitField
 } from "discord.js";
 
+export const category = "Moderation";
+export const permissionLevel = 3;
+
 
 export const data = new SlashCommandBuilder()
 

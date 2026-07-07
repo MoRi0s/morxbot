@@ -2,6 +2,9 @@ import { SlashCommandBuilder } from "discord.js";
 import { playSound } from "../utils/soundPlayer.js";
 import { jsonDB } from "../utils/jsonStore.js";
 
+export const category = "Music";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
     .setName("sound")
     .setDescription("任意の音声URL(mp3/wav/ogg/Discord URL)を再生")

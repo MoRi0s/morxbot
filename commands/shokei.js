@@ -6,6 +6,8 @@ import {
     PermissionsBitField
 } from "discord.js";
 
+export const category = "Moderation";
+export const permissionLevel = 2;
 
 export const data = new SlashCommandBuilder()
 
@@ -136,17 +138,87 @@ if(!isAdmin && !hasRole){
 }
 
 
+ // ==========================
+// shokeilist確認
+// ==========================
+
+const file =
+    path.join(
+        context.dataDir,
+        "shokeilist.json"
+    );
 
 
-const target =
-interaction.options.getMember("user");
-
-
-
-if(!target){
+if(!fs.existsSync(file)){
 
     return interaction.reply({
-        content:"❌ 対象が見つかりません",
+        content:"❌ 処刑リストがありません",
+        flags:64
+    });
+
+}
+
+
+
+let list;
+
+try {
+
+    list =
+    JSON.parse(
+        fs.readFileSync(
+            file,
+            "utf8"
+        )
+    );
+
+} catch {
+
+    return interaction.reply({
+        content:"❌ 処刑リストが壊れています",
+        flags:64
+    });
+
+}
+
+
+
+const user =
+    interaction.options.getUser("user");
+
+
+// JSON登録確認
+const punishTarget =
+    list.users.find(
+        u => u.id === user.id
+    );
+
+
+// 登録されていない場合拒否
+if(!punishTarget){
+
+    return interaction.reply({
+        content:
+        "❌ このユーザーはshokeiaddで登録されていません",
+        flags:64
+    });
+
+}
+
+
+// Discord Member取得
+const member =
+    await interaction.guild.members
+    .fetch(user.id)
+    .catch(()=>null);
+
+
+
+if(!member){
+
+    return interaction.reply({
+        content:
+        "❌ サーバーメンバーではありません",
         flags:64
     });
 
@@ -158,35 +230,37 @@ if(!target){
 // 安全確認
 // =================
 
-if(target.id === interaction.user.id){
+
+// 自分自身禁止
+if(member.id === interaction.user.id){
 
     return interaction.reply({
-        content:"❌ 自分自身には使用できません",
+        content:
+        "❌ 自分自身には使用できません",
         flags:64
     });
 
 }
 
 
-
-if(target.user.bot){
+// BOT禁止
+if(member.user.bot){
 
     return interaction.reply({
-        content:"❌ BOTには使用できません",
+        content:
+        "❌ BOTには使用できません",
         flags:64
     });
 
 }
 
 
-
-
+// 自分より上位ロール禁止
 if(
-interaction.member.roles.highest.position
-<=
-target.roles.highest.position
-&&
-!isAdmin
+    member.roles.highest.position >=
+    interaction.member.roles.highest.position
+    &&
+    !isAdmin
 ){
 
     return interaction.reply({

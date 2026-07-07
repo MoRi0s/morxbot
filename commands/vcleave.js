@@ -2,6 +2,9 @@
 import { SlashCommandBuilder } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 
+export const category = "Music";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
     .setName("vcleave")
     .setDescription("Bot をVCから退出させる");

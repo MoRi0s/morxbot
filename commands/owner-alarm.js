@@ -2,6 +2,9 @@ import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embe
 import fs from "fs";
 import path from "path";
 
+export const category = "Others";
+export const permissionLevel = 2;
+
 const rolesFile = path.join("./data/roles.json");
 
 function loadJSON(file) {
@@ -17,7 +20,7 @@ export async function execute(interaction) {
   // 管理者チェック
 
 
-  
+
 const roleConfigs = JSON.parse(
     fs.readFileSync("./data/roleconfig.json", "utf8")
 );

@@ -3,6 +3,8 @@ import {
     PermissionFlagsBits
 } from "discord.js";
 
+export const category = "Others";
+export const permissionLevel = 1;
 
 export const data = new SlashCommandBuilder()
 

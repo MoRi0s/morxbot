@@ -2,6 +2,9 @@
 import { SlashCommandBuilder } from "discord.js";
 import { jsonDB } from "../utils/jsonStore.js";
 
+export const category = "Music";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
     .setName("soundfavorite")
     .setDescription("サウンドURLをお気に入りに追加")

@@ -8,6 +8,9 @@ import {
     ButtonStyle
 } from "discord.js";
 
+export const category = "Game";
+export const permissionLevel = 1;
+
 export const data = new SlashCommandBuilder()
     .setName("iphoneaki")
     .setDescription("iPhoneアキネーター");

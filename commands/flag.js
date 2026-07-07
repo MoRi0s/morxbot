@@ -5,6 +5,8 @@ import {
 import fs from "fs";
 import path from "path";
 
+export const category = "Bot Settings";
+export const permissionLevel = 4;
 
 export const data = new SlashCommandBuilder()
 
