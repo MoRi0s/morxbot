@@ -253,6 +253,12 @@ if(flagConfig.globalCommand){
 
 }
 
+
+console.log(
+    "FLAG:",
+    flagConfig.globalCommand
+);
+
 // -------------------------
 const context = {
   client,
