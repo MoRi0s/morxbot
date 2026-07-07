@@ -518,9 +518,13 @@ client.on("interactionCreate", async (interaction) => {
 // =========================
 // login
 // =========================
-client.login(process.env.DISCORD_TOKEN);
+client.once("ready", () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+});
 
-
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log("Login OK"))
+  .catch(console.error);
 
 const port = process.env.PORT || 3000;
 
