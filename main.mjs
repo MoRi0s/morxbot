@@ -58,7 +58,13 @@ const commandsForRegister = [];
 for (const file of commandFiles) {
   try {
     const full = path.join(commandsDir, file);
-    const mod = await import(pathToFileURL(full).href);
+
+
+ console.log("Import start:", file);
+
+const mod = await import(pathToFileURL(full).href);
+
+console.log("Import done:", file);
 
     if (!mod?.data || !mod?.execute) continue;
 
@@ -70,6 +76,8 @@ for (const file of commandFiles) {
     console.error("Load error:", file, e);
   }
 }
+
+
 
 // -------------------------
 // Slash register
