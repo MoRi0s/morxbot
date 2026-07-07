@@ -526,9 +526,23 @@ console.log("Before login");
 console.log("TOKEN exists:", !!process.env.DISCORD_TOKEN);
 console.log("TOKEN length:", process.env.DISCORD_TOKEN?.length);
 
+client.on("debug", console.log);
+client.on("warn", console.warn);
+
+client.on("error", console.error);
+client.on("shardError", console.error);
+client.on("shardDisconnect", console.log);
+client.on("shardReconnecting", console.log);
+client.on("shardReady", id => console.log("Shard ready", id));
+
 client.login(process.env.DISCORD_TOKEN)
   .then(() => console.log("Login OK"))
   .catch(err => console.error("Login Error:", err));
+
+// ★これを追加
+setTimeout(() => {
+  console.log("WS Status:", client.ws.status);
+}, 5000);
 
 console.log("After login");
 
