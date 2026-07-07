@@ -85,6 +85,10 @@ const flagFile = path.join(
 );
 
 
+console.log("flag path:", flagFile);
+console.log("flag exists:", fs.existsSync(flagFile));
+
+
 let flagConfig = {
     globalCommand: false
 };
