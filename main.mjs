@@ -74,21 +74,183 @@ for (const file of commandFiles) {
 // -------------------------
 // Slash register
 // -------------------------
-const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
-const guildIds = process.env.GUILD_IDS.split(",").map(g => g.trim());
+const rest = new REST({ version: "10" })
+    .setToken(process.env.DISCORD_TOKEN);
 
-for (const guildId of guildIds) {
-  (async () => {
+
+const flagFile = path.join(
+    __dirname,
+    "data",
+    "flag.json"
+);
+
+
+let flagConfig = {
+    globalCommand: false
+};
+
+
+// flag.json読み込み
+
+if(fs.existsSync(flagFile)){
+
     try {
-      await rest.put(
-        Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId),
-        { body: commandsForRegister }
-      );
-      console.log("Registered:", guildId);
-    } catch (e) {
-      console.error(e);
+
+        flagConfig =
+            JSON.parse(
+                fs.readFileSync(
+                    flagFile,
+                    "utf8"
+                )
+            );
+
+    } catch(err){
+
+        console.error(
+            "flag.json error:",
+            err
+        );
+
     }
-  })();
+
+}
+
+
+
+// ==========================
+// コマンド登録
+// ==========================
+
+
+if(flagConfig.globalCommand){
+
+
+    // --------------------------
+    // GLOBAL登録
+    // --------------------------
+
+    try {
+
+        await rest.put(
+
+            Routes.applicationCommands(
+                process.env.CLIENT_ID
+            ),
+
+            {
+                body: commandsForRegister
+            }
+
+        );
+
+
+        console.log(
+            "Registered: GLOBAL COMMAND"
+        );
+
+
+    } catch(e){
+
+        console.error(
+            "Global register error:",
+            e
+        );
+
+    }
+
+
+
+}else{
+
+
+    // --------------------------
+    // GLOBAL削除
+    // --------------------------
+
+    try {
+
+        await rest.put(
+
+            Routes.applicationCommands(
+                process.env.CLIENT_ID
+            ),
+
+            {
+                body:[]
+            }
+
+        );
+
+
+        console.log(
+            "Deleted: GLOBAL COMMAND"
+        );
+
+
+    } catch(e){
+
+        console.error(
+            "Global delete error:",
+            e
+        );
+
+    }
+
+
+
+    // --------------------------
+    // GUILD登録
+    // --------------------------
+
+    const guildIds =
+        process.env.GUILD_IDS
+        .split(",")
+        .map(g => g.trim());
+
+        console.log(
+    `📡 Local Guild Count: ${guildIds.length}`
+);
+
+
+
+
+    for(const guildId of guildIds){
+
+        try {
+
+
+            await rest.put(
+
+                Routes.applicationGuildCommands(
+                    process.env.CLIENT_ID,
+                    guildId
+                ),
+
+                {
+                    body: commandsForRegister
+                }
+
+            );
+
+
+            console.log(
+                "Registered:",
+                guildId
+            );
+
+
+        }catch(e){
+
+            console.error(
+                "Guild register error:",
+                guildId,
+                e
+            );
+
+        }
+
+    }
+
 }
 
 // -------------------------

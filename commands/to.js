@@ -42,15 +42,31 @@ export async function execute(interaction, context) {
     // 管理者不要サーバー
     // ==========================
 
-    const noAdminGuilds = [
-        "1400821974409810000"
-    ];
+const chaosFile =
+    path.join(
+        context.dataDir,
+        "chaos.json"
+    );
 
 
-    const noAdmin =
-        noAdminGuilds.includes(
-            interaction.guild.id
-        );
+let chaos = {};
+
+
+if(fs.existsSync(chaosFile)){
+
+    chaos =
+    JSON.parse(
+        fs.readFileSync(
+            chaosFile,
+            "utf8"
+        )
+    );
+
+}
+
+
+const noAdmin =
+    chaos[interaction.guild.id]?.enabled === true;
 
 
 
