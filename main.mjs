@@ -522,9 +522,15 @@ client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
+console.log("Before login");
+console.log("TOKEN exists:", !!process.env.DISCORD_TOKEN);
+console.log("TOKEN length:", process.env.DISCORD_TOKEN?.length);
+
 client.login(process.env.DISCORD_TOKEN)
   .then(() => console.log("Login OK"))
-  .catch(console.error);
+  .catch(err => console.error("Login Error:", err));
+
+console.log("After login");
 
 const port = process.env.PORT || 3000;
 
