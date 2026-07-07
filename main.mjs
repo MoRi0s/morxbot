@@ -128,6 +128,56 @@ if(fs.existsSync(flagFile)){
 }
 
 
+// =========================
+// login
+// =========================
+client.once("clientReady", () => {
+    console.log(`✅ Logged in as ${client.user.tag}`);
+    console.log(`📦 Commands: ${client.commands.size}`);
+});
+
+console.log("Before login");
+console.log("TOKEN exists:", !!process.env.DISCORD_TOKEN);
+console.log("TOKEN length:", process.env.DISCORD_TOKEN?.length);
+
+client.on("debug", console.log);
+client.on("warn", console.warn);
+
+client.on("error", console.error);
+client.on("shardError", console.error);
+client.on("shardDisconnect", console.log);
+client.on("shardReconnecting", console.log);
+client.on("shardReady", id => console.log("Shard ready", id));
+
+fetch("https://discord.com/api/v10/gateway")
+  .then(async (r) => {
+    console.log("Gateway status:", r.status);
+    console.log("Gateway content-type:", r.headers.get("content-type"));
+
+    const text = await r.text();
+    console.log(text);
+  })
+  .catch(console.error);
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log("Login OK"))
+  .catch(err => console.error("Login Error:", err));
+
+// ★これを追加
+setTimeout(() => {
+  console.log("WS Status:", client.ws.status);
+}, 5000);
+
+console.log("After login");
+
+const port = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+  res.send("Bot is running");
+});
+
+app.listen(port, () => {
+  console.log("Listening on port", port);
+});
 
 // ==========================
 // コマンド登録
@@ -276,6 +326,10 @@ const context = {
   client,
   dataDir: path.join(__dirname, "data")
 };
+
+
+
+
 
 // =========================
 // AutoBan Leave
@@ -694,53 +748,3 @@ client.on("interactionCreate", async (interaction) => {
 
 
 
-// =========================
-// login
-// =========================
-client.once("clientReady", () => {
-    console.log(`✅ Logged in as ${client.user.tag}`);
-    console.log(`📦 Commands: ${client.commands.size}`);
-});
-
-console.log("Before login");
-console.log("TOKEN exists:", !!process.env.DISCORD_TOKEN);
-console.log("TOKEN length:", process.env.DISCORD_TOKEN?.length);
-
-client.on("debug", console.log);
-client.on("warn", console.warn);
-
-client.on("error", console.error);
-client.on("shardError", console.error);
-client.on("shardDisconnect", console.log);
-client.on("shardReconnecting", console.log);
-client.on("shardReady", id => console.log("Shard ready", id));
-
-fetch("https://discord.com/api/v10/gateway")
-  .then(async (r) => {
-    console.log("Gateway status:", r.status);
-    console.log("Gateway content-type:", r.headers.get("content-type"));
-
-    const text = await r.text();
-    console.log(text);
-  })
-  .catch(console.error);
-client.login(process.env.DISCORD_TOKEN)
-  .then(() => console.log("Login OK"))
-  .catch(err => console.error("Login Error:", err));
-
-// ★これを追加
-setTimeout(() => {
-  console.log("WS Status:", client.ws.status);
-}, 5000);
-
-console.log("After login");
-
-const port = process.env.PORT || 3000;
-
-app.get("/", (req, res) => {
-  res.send("Bot is running");
-});
-
-app.listen(port, () => {
-  console.log("Listening on port", port);
-});
