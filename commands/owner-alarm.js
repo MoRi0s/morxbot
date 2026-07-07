@@ -15,9 +15,40 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
   // 管理者チェック
-  if (!interaction.member.permissions.has("Administrator")) {
-    return interaction.reply({ content: "⛔ 管理者のみ使用可能です", ephemeral: true });
-  }
+
+
+  
+const roleConfigs = JSON.parse(
+    fs.readFileSync("./data/roleconfig.json", "utf8")
+);
+
+const roleConfig = roleConfigs[interaction.guild.id] ?? {
+    adminRoles: []
+};
+
+
+const isAdmin =
+    interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+    );
+
+
+const hasAdminRole =
+    interaction.member.roles.cache.some(role =>
+        roleConfig.adminRoles.includes(role.id)
+    );
+
+
+if (!isAdmin && !hasAdminRole) {
+    return interaction.reply({
+        content:"❌ 管理者または設定された管理ロールのみ使用可能です",
+        flags:64
+    });
+}
+
+
+
+
 
   const guildId = interaction.guild.id;
   const rolesData = loadJSON(rolesFile);

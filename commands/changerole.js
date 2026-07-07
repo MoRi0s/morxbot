@@ -9,6 +9,9 @@ import {
     PermissionsBitField
 } from "discord.js";
 
+import fs from "fs";
+import path from "path";
+
 // ======================
 // Slash Command（5個）
 // ======================
@@ -39,12 +42,33 @@ for (let i = 1; i <= 5; i++) {
 // ======================
 export async function execute(interaction) {
 
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        return interaction.reply({
-            content: "❌ 管理者のみ",
-            flags: 64
-        });
-    }
+const roleConfigs = JSON.parse(
+    fs.readFileSync("./data/roleconfig.json", "utf8")
+);
+
+const roleConfig = roleConfigs[interaction.guild.id] ?? {
+    adminRoles: []
+};
+
+
+const isAdmin =
+    interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+    );
+
+
+const hasAdminRole =
+    interaction.member.roles.cache.some(role =>
+        roleConfig.adminRoles.includes(role.id)
+    );
+
+
+if (!isAdmin && !hasAdminRole) {
+    return interaction.reply({
+        content:"❌ 管理者または設定された管理ロールのみ使用可能です",
+        flags:64
+    });
+}
 
     const addIds = [];
     const removeIds = [];
