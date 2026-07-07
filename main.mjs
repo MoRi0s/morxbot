@@ -534,6 +534,11 @@ client.on("shardDisconnect", console.log);
 client.on("shardReconnecting", console.log);
 client.on("shardReady", id => console.log("Shard ready", id));
 
+fetch("https://discord.com/api/v10/gateway")
+  .then(r => r.json())
+  .then(console.log)
+  .catch(console.error);
+
 client.login(process.env.DISCORD_TOKEN)
   .then(() => console.log("Login OK"))
   .catch(err => console.error("Login Error:", err));
