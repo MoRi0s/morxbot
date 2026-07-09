@@ -1,0 +1,30 @@
+name: Deploy MorxBot
+
+'on':
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 100.93.80.96
+          username: deploy
+          key: ${{ secrets.SERVER_KEY }}
+
+          script: |
+            cd /home/mori/DiscordBot/morxbot
+            git pull
+            npm install
+            sudo -u mori pm2 restart morxbot
