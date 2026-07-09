@@ -163,6 +163,7 @@ client.once("clientReady", () => {
 
 });
 
+
 console.log("Before login");
 console.log("TOKEN exists:", !!process.env.DISCORD_TOKEN);
 console.log("TOKEN length:", process.env.DISCORD_TOKEN?.length);
