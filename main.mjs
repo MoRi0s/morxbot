@@ -207,19 +207,11 @@ app.listen(port, () => {
   console.log("Listening on port", port);
 });
 
-// ==========================
-// コマンド登録
-// ==========================
 
 // --------------------------
 // Slash register
 // --------------------------
 
-const flagFile = path.join(
-  __dirname,
-  "data",
-  "flag.json"
-);
 
 
 
