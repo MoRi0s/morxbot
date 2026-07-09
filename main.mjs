@@ -150,7 +150,7 @@ client.once("clientReady", () => {
 
     };
 
-    
+
 
     updateStatus();
 
@@ -160,7 +160,6 @@ client.once("clientReady", () => {
       updateStatus,
       10 * 60 * 1000
     );
-
 
 });
 
