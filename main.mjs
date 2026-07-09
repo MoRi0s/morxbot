@@ -22,7 +22,8 @@ import {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonStyle
+  ButtonStyle,
+  ActivityType
 } from "discord.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -132,6 +133,34 @@ if (fs.existsSync(flagFile)) {
 client.once("clientReady", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
   console.log(`📦 Commands: ${client.commands.size}`);
+
+ console.log(
+      `Logged in ${client.user.tag}`
+    );
+
+
+    const updateStatus = () => {
+
+      client.user.setActivity(
+        `Bot is Working.. | Servers: ${client.guilds.cache.size} | Commands: ${client.commands.size}`,
+        {
+          type: ActivityType.Playing
+        }
+      );
+
+    };
+
+
+    updateStatus();
+
+
+    // 10分ごとに更新
+    setInterval(
+      updateStatus,
+      10 * 60 * 1000
+    );
+
+
 });
 
 console.log("Before login");
