@@ -181,53 +181,80 @@ app.listen(port, () => {
 // コマンド登録
 // ==========================
 
+// --------------------------
+// Slash register
+// --------------------------
 
-if (flagConfig.globalCommand) {
-
-  console.log("START GLOBAL REGISTER");
-  // --------------------------
-  // GLOBAL登録
-  // --------------------------
-
-  try {
-
-    await rest.put(
-
-      Routes.applicationCommands(
-        process.env.CLIENT_ID
-      ),
-
-      {
-        body: commandsForRegister
-      }
-
-    );
+const rest = new REST({ version: "10" })
+  .setToken(process.env.DISCORD_TOKEN);
 
 
-    console.log(
-      "Registered: GLOBAL COMMAND"
-    );
+
+const flagFile = path.join(
+  __dirname,
+  "data",
+  "flag.json"
+);
 
 
-  } catch (e) {
+
+let flagConfig = {
+  globalCommand:false
+};
+
+
+
+if(fs.existsSync(flagFile)){
+
+  try{
+
+    flagConfig =
+      JSON.parse(
+        fs.readFileSync(
+          flagFile,
+          "utf8"
+        )
+      );
+
+
+  }catch(e){
 
     console.error(
-      "Global register error:",
+      "flag.json error:",
       e
     );
 
   }
 
+}
 
 
-} else {
+
+// ==========================
+// コマンド登録
+// ==========================
+
+
+if(flagConfig.globalCommand){
+
+
+  console.log(
+    "START GLOBAL MODE"
+  );
+
 
 
   // --------------------------
-  // GLOBAL削除
+  // 既存GLOBAL削除
   // --------------------------
 
-  try {
+  try{
+
+
+    console.log(
+      "Deleting old GLOBAL commands..."
+    );
+
 
     await rest.put(
 
@@ -236,18 +263,18 @@ if (flagConfig.globalCommand) {
       ),
 
       {
-        body: []
+        body:[]
       }
 
     );
 
 
     console.log(
-      "Deleted: GLOBAL COMMAND"
+      "Deleted old GLOBAL commands"
     );
 
 
-  } catch (e) {
+  }catch(e){
 
     console.error(
       "Global delete error:",
@@ -258,6 +285,91 @@ if (flagConfig.globalCommand) {
 
 
 
+
+  // --------------------------
+  // GLOBAL登録
+  // --------------------------
+
+  try{
+
+
+    await rest.put(
+
+      Routes.applicationCommands(
+        process.env.CLIENT_ID
+      ),
+
+      {
+        body:commandsForRegister
+      }
+
+    );
+
+
+    console.log(
+      "Registered: GLOBAL COMMAND"
+    );
+
+
+  }catch(e){
+
+    console.error(
+      "Global register error:",
+      e
+    );
+
+  }
+
+
+
+
+}else{
+
+
+  console.log(
+    "START GUILD MODE"
+  );
+
+
+
+  // --------------------------
+  // GLOBAL削除
+  // --------------------------
+
+  try{
+
+
+    await rest.put(
+
+      Routes.applicationCommands(
+        process.env.CLIENT_ID
+      ),
+
+      {
+        body:[]
+      }
+
+    );
+
+
+    console.log(
+      "Deleted: GLOBAL COMMAND"
+    );
+
+
+  }catch(e){
+
+    console.error(
+      "Global delete error:",
+      e
+    );
+
+  }
+
+
+
+
+
   // --------------------------
   // GUILD登録
   // --------------------------
@@ -265,7 +377,9 @@ if (flagConfig.globalCommand) {
   const guildIds =
     process.env.GUILD_IDS
       .split(",")
-      .map(g => g.trim());
+      .map(g=>g.trim());
+
+
 
   console.log(
     `📡 Local Guild Count: ${guildIds.length}`
@@ -274,23 +388,61 @@ if (flagConfig.globalCommand) {
 
 
 
-  for (const guildId of guildIds) {
+  for(const guildId of guildIds){
 
-    try {
 
+    try{
+
+
+      // --------------------------
+      // 既存GUILD削除
+      // --------------------------
 
       await rest.put(
 
         Routes.applicationGuildCommands(
+
           process.env.CLIENT_ID,
+
           guildId
+
         ),
 
         {
-          body: commandsForRegister
+          body:[]
         }
 
       );
+
+
+      console.log(
+        "Deleted old guild:",
+        guildId
+      );
+
+
+
+
+      // --------------------------
+      // GUILD再登録
+      // --------------------------
+
+      await rest.put(
+
+        Routes.applicationGuildCommands(
+
+          process.env.CLIENT_ID,
+
+          guildId
+
+        ),
+
+        {
+          body:commandsForRegister
+        }
+
+      );
+
 
 
       console.log(
@@ -299,19 +451,29 @@ if (flagConfig.globalCommand) {
       );
 
 
-    } catch (e) {
+
+    }catch(e){
+
 
       console.error(
+
         "Guild register error:",
+
         guildId,
+
         e
+
       );
+
 
     }
 
+
   }
 
+
 }
+
 
 
 console.log(
@@ -319,10 +481,22 @@ console.log(
   flagConfig.globalCommand
 );
 
+
+
 // -------------------------
+// Context
+// -------------------------
+
 const context = {
+
   client,
-  dataDir: path.join(__dirname, "data")
+
+  dataDir:
+    path.join(
+      __dirname,
+      "data"
+    )
+
 };
 
 
