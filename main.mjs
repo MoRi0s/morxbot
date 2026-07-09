@@ -142,7 +142,7 @@ client.once("clientReady", () => {
     const updateStatus = () => {
 
       client.user.setActivity(
-        `Bot is Working... | Servers: ${client.guilds.cache.size} | Commands: ${client.commands.size}`,
+        `Bot is Working... | /help | Servers: ${client.guilds.cache.size} `,
         {
           type: ActivityType.Playing
         }
