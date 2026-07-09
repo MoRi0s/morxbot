@@ -58,6 +58,8 @@ jobs:
             echo "CHANGE DIRECTORY"
             cd /home/mori/DiscordBot/morxbot
 
+            git config --global --add safe.directory /home/mori/DiscordBot/morxbot
+
             echo "GIT STATUS BEFORE:"
             git status
 
