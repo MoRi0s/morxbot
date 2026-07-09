@@ -47,7 +47,36 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
 
           script: |
+            echo "=== DEPLOY START ==="
+
+            echo "USER:"
+            whoami
+
+            echo "CURRENT DIR:"
+            pwd
+
+            echo "CHANGE DIRECTORY"
             cd /home/mori/DiscordBot/morxbot
+
+            echo "GIT STATUS BEFORE:"
+            git status
+
+            echo "CURRENT COMMIT BEFORE:"
+            git log -1 --oneline
+
+            echo "RUN GIT PULL"
             git pull
+
+            echo "CURRENT COMMIT AFTER:"
+            git log -1 --oneline
+
+            echo "RUN NPM INSTALL"
             npm install
+
+            echo "RESTART PM2"
             sudo -u mori pm2 restart morxbot
+
+            echo "PM2 STATUS:"
+            sudo -u mori pm2 status
+
+            echo "=== DEPLOY END ==="
