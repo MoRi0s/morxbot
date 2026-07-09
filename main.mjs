@@ -208,42 +208,6 @@ app.listen(port, () => {
 });
 
 
-// --------------------------
-// Slash register
-// --------------------------
-
-
-
-
-let flagConfig = {
-  globalCommand:false
-};
-
-
-
-if(fs.existsSync(flagFile)){
-
-  try{
-
-    flagConfig =
-      JSON.parse(
-        fs.readFileSync(
-          flagFile,
-          "utf8"
-        )
-      );
-
-
-  }catch(e){
-
-    console.error(
-      "flag.json error:",
-      e
-    );
-
-  }
-
-}
 
 
 
