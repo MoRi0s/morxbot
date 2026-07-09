@@ -215,11 +215,6 @@ app.listen(port, () => {
 // Slash register
 // --------------------------
 
-const rest = new REST({ version: "10" })
-  .setToken(process.env.DISCORD_TOKEN);
-
-
-
 const flagFile = path.join(
   __dirname,
   "data",
