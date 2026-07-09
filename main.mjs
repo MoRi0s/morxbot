@@ -155,7 +155,6 @@ client.once("clientReady", () => {
     updateStatus();
 
 
-    
     // 10分ごとに更新
     setInterval(
       updateStatus,
