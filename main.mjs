@@ -230,6 +230,8 @@ if(flagConfig.globalCommand){
   try{
 
 
+console.log("COMMAND COUNT:", commandsForRegister.length);
+console.log(JSON.stringify(commandsForRegister).length);
 console.log("GLOBAL register start");
 
 await rest.put(
