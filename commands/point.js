@@ -1,9 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+import { SlashCommandBuilder } from 'discord.js';
 
-module.exports = {
+export default {
   data: new SlashCommandBuilder()
     .setName('point')
-    .setDescription('点数を表示します')
+    .setDescription('ランダムで点数を表示します')
     .addIntegerOption(option =>
       option
         .setName('max')
@@ -17,8 +17,6 @@ module.exports = {
 
     const point = Math.floor(Math.random() * (max + 1));
 
-    await interaction.reply(
-      `${max}点中${point}点`
-    );
+    await interaction.reply(`${max}点中${point}点`);
   },
 };
