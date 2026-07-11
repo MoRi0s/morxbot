@@ -240,14 +240,17 @@ console.log("COMMAND COUNT:", commandsForRegister.length);
 console.log(JSON.stringify(commandsForRegister).length);
 console.log("GLOBAL register start");
 
+console.time("global-register");
+
 await rest.put(
-  Routes.applicationCommands(
-    process.env.CLIENT_ID
-  ),
+  Routes.applicationCommands(process.env.CLIENT_ID),
   {
     body: commandsForRegister
   }
 );
+
+console.timeEnd("global-register");
+console.log("GLOBAL register done");
 
 console.log("GLOBAL register done");
 
