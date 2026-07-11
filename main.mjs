@@ -275,20 +275,25 @@ console.log("===== COMMANDS =====");
 
 
 try {
-    console.log("COMMAND COUNT:", commandsForRegister.length);
+  console.log("COMMAND COUNT:", commandsForRegister.length);
 
-    const res = await rest.put(
-        Routes.applicationCommands(process.env.CLIENT_ID),
-        {
-            body: commandsForRegister
-        }
-    );
+  const res = await fetch(
+    `https://discord.com/api/v10/applications/${process.env.CLIENT_ID}/commands`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(commandsForRegister),
+    }
+  );
 
-    console.log("DONE");
-    console.log(res);
+  console.log("STATUS:", res.status);
+  console.log(await res.text());
 
 } catch (e) {
-    console.error(e);
+  console.error(e);
 }
 
 console.log("====================");
