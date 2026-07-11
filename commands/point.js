@@ -1,22 +1,20 @@
 import { SlashCommandBuilder } from 'discord.js';
 
-export default {
-  data: new SlashCommandBuilder()
-    .setName('point')
-    .setDescription('ランダムで点数を表示します')
-    .addIntegerOption(option =>
-      option
-        .setName('max')
-        .setDescription('点数の上限')
-        .setRequired(true)
-        .setMinValue(1)
-    ),
+export const data = new SlashCommandBuilder()
+  .setName('point')
+  .setDescription('ランダムで点数を表示します')
+  .addIntegerOption(option =>
+    option
+      .setName('max')
+      .setDescription('点数の上限')
+      .setRequired(true)
+      .setMinValue(1)
+  );
 
-  async execute(interaction) {
-    const max = interaction.options.getInteger('max');
+export async function execute(interaction) {
+  const max = interaction.options.getInteger('max');
 
-    const point = Math.floor(Math.random() * (max + 1));
+  const point = Math.floor(Math.random() * (max + 1));
 
-    await interaction.reply(`${max}点中${point}点`);
-  },
-};
+  await interaction.reply(`${max}点中${point}点`);
+}
