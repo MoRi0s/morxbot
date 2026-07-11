@@ -230,17 +230,18 @@ if(flagConfig.globalCommand){
   try{
 
 
-    await rest.put(
+console.log("GLOBAL register start");
 
-      Routes.applicationCommands(
-        process.env.CLIENT_ID
-      ),
+await rest.put(
+  Routes.applicationCommands(
+    process.env.CLIENT_ID
+  ),
+  {
+    body: commandsForRegister
+  }
+);
 
-      {
-        body:commandsForRegister
-      }
-
-    );
+console.log("GLOBAL register done");
 
 
     console.log(
