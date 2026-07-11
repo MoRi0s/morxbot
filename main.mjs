@@ -147,7 +147,8 @@ client.once("clientReady", () => {
       client.user.setActivity(
         `Bot is Working... | /help | Servers: ${client.guilds.cache.size} `,
         {
-          type: ActivityType.Playing
+          type: ActivityType.Streaming,
+          url: "https://www.twitch.tv/mori_0s"
         }
       );
 
