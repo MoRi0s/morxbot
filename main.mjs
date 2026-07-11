@@ -233,21 +233,68 @@ if(flagConfig.globalCommand){
   // GLOBAL登録
   // --------------------------
 
+const controller = new AbortController();
+
+setTimeout(() => controller.abort(), 10000);
+
+await fetch(
+  `https://discord.com/api/v10/applications/${process.env.CLIENT_ID}/commands`,
+  {
+    method: "GET",
+    headers: {
+      Authorization: `Bot ${process.env.DISCORD_TOKEN}`
+    },
+    signal: controller.signal
+  }
+)
+.then(async r => {
+  console.log("GET:", r.status);
+  console.log(await r.text());
+})
+.catch(console.error);
+
+
   try{
 
+for (const cmd of commandsForRegister) {
+  console.log(cmd.name);
+}
 
-console.log("COMMAND COUNT:", commandsForRegister.length);
+console.log(commandsForRegister.length);
+console.log(
+  Buffer.byteLength(JSON.stringify(commandsForRegister), "utf8")
+);
+
 console.log(JSON.stringify(commandsForRegister).length);
 console.log("GLOBAL register start");
 
 console.time("global-register");
 
-await rest.put(
-  Routes.applicationCommands(process.env.CLIENT_ID),
-  {
-    body: commandsForRegister
-  }
-);
+console.log("===== COMMANDS =====");
+
+for (const cmd of commandsForRegister) {
+  console.log(cmd.name);
+  console.dir(cmd, { depth: null });
+}
+
+try {
+    console.log("COMMAND COUNT:", commandsForRegister.length);
+
+    const res = await rest.put(
+        Routes.applicationCommands(process.env.CLIENT_ID),
+        {
+            body: commandsForRegister
+        }
+    );
+
+    console.log("DONE");
+    console.log(res);
+
+} catch (e) {
+    console.error(e);
+}
+
+console.log("====================");
 
 console.timeEnd("global-register");
 console.log("GLOBAL register done");
