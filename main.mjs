@@ -272,10 +272,7 @@ console.time("global-register");
 
 console.log("===== COMMANDS =====");
 
-for (const cmd of commandsForRegister) {
-  console.log(cmd.name);
-  console.dir(cmd, { depth: null });
-}
+
 
 try {
     console.log("COMMAND COUNT:", commandsForRegister.length);
