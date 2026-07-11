@@ -82,8 +82,8 @@ for (const file of commandFiles) {
 // Slash register
 // -------------------------
 const rest = new REST({ version: "10" })
-  .setToken(process.env.DISCORD_TOKEN);
-
+  .setToken(process.env.DISCORD_TOKEN)
+  .setTimeout(15000);
 
 const flagFile = path.join(
   __dirname,
