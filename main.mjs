@@ -82,8 +82,8 @@ for (const file of commandFiles) {
 // Slash register
 // -------------------------
 const rest = new REST({ version: "10" })
-  .setToken(process.env.DISCORD_TOKEN)
-  .setTimeout(15000);
+  .setToken(process.env.DISCORD_TOKEN);
+
 
 const flagFile = path.join(
   __dirname,
@@ -234,15 +234,23 @@ console.log("COMMAND COUNT:", commandsForRegister.length);
 console.log(JSON.stringify(commandsForRegister).length);
 console.log("GLOBAL register start");
 
+
+
 await rest.put(
   Routes.applicationCommands(
     process.env.CLIENT_ID
   ),
   {
-    body: commandsForRegister
+    body: [
+      {
+        name: "test",
+        description: "test command"
+      }
+    ]
   }
 );
 
+console.log("GLOBAL register done");
 console.log("GLOBAL register done");
 
 
