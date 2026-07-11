@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
   .setName('point')
-  .setDescription('ランダムで点数を表示します')
+  .setDescription('n点中何点なのかを表示します')
   .addIntegerOption(option =>
     option
       .setName('max')
