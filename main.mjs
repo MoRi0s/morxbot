@@ -188,6 +188,8 @@ if(flagConfig.globalCommand){
   // 既存GLOBAL削除
   // --------------------------
 
+/*
+
   try{
 
 
@@ -223,7 +225,7 @@ if(flagConfig.globalCommand){
 
   }
 
-
+*/
 
 
   // --------------------------
