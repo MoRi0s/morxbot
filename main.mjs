@@ -84,6 +84,9 @@ for (const file of commandFiles) {
 const rest = new REST({ version: "10" })
   .setToken(process.env.DISCORD_TOKEN);
 
+  rest.on("rateLimited", info => {
+  console.log("RATE LIMITED", info);
+});
 
 const flagFile = path.join(
   __dirname,
