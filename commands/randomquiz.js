@@ -489,7 +489,7 @@ export async function handleModal(interaction){
             0x0099ff
         )
         .setTitle(
-            `${interaction.member?.displayName ?? interaction.user.username}の結果`
+            `${interaction.member?.displayName ?? interaction.user.username}のランダムクイズ結果`
         )
         .setDescription(
             result.slice(0,4000)
