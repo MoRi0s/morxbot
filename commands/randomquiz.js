@@ -405,18 +405,60 @@ export async function handleModal(interaction){
 
 
 
-    session.questions.forEach(
-        (q,i)=>{
+const resultList = [];
 
-            result +=
-            `**Q${i+1}. ${q}**\n`;
+session.questions.forEach(
+    (q,i)=>{
 
-            result +=
-            `${session.answers[i] ?? "未回答"}\n\n`;
+        resultList.push({
+            question:q,
+            answer:session.answers[i] ?? "未回答"
+        });
 
-        }
-    );
+    }
+);
 
+
+// 結果だけシャッフル
+for(
+    let i = resultList.length - 1;
+    i > 0;
+    i--
+){
+
+    const j =
+        Math.floor(
+            Math.random() * (i + 1)
+        );
+
+
+    [
+        resultList[i],
+        resultList[j]
+    ] =
+    [
+        resultList[j],
+        resultList[i]
+    ];
+
+}
+
+
+
+let result = "";
+
+
+resultList.forEach(
+    (item,i)=>{
+
+        result +=
+        `**${i+1}. ${item.question}**\n`;
+
+        result +=
+        `${item.answer}\n\n`;
+
+    }
+);
 
 
     const embed =
