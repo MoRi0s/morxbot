@@ -725,6 +725,40 @@ client.on("interactionCreate", async (interaction) => {
     }
 
 
+// ======================
+// questioncreate MODAL
+// ======================
+if (
+  interaction.isModalSubmit() &&
+  interaction.customId === "questioncreate"
+) {
+
+  const cmd = client.commands.get("questioncreate");
+
+  if (!cmd?.handleModal) return;
+
+  await cmd.handleModal(interaction, context);
+
+  return;
+}
+
+// ======================
+// randomquiz MODAL
+// ======================
+if (
+  interaction.isModalSubmit() &&
+  interaction.customId === "randomquiz"
+) {
+
+  const cmd = client.commands.get("randomquiz");
+
+  if (!cmd?.handleModal) return;
+
+  await cmd.handleModal(interaction, context);
+
+  return;
+}
+
 
     // ======================
     // iphoneaki（完全維持）

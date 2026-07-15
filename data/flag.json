@@ -1,5 +1,5 @@
 {
-  "globalCommand": true,
+  "globalCommand": false,
   "allowGuilds": [
     "1181951227874005002"
   ],

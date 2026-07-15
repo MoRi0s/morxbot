@@ -56,9 +56,9 @@ jobs:
             pwd
 
             echo "CHANGE DIRECTORY"
-            cd /home/mori/DiscordBot/morxbot
+            cd /data/DiscordBot/morxbot
 
-            git config --global --add safe.directory /home/mori/DiscordBot/morxbot
+            git config --global --add safe.directory /data/DiscordBot/morxbot
 
             echo "GIT STATUS BEFORE:"
             git status
