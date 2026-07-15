@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import {
     SlashCommandBuilder,
     ModalBuilder,
@@ -10,83 +11,242 @@ import {
     PermissionsBitField
 } from "discord.js";
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATA_DIR = path.join(__dirname, "..", "data");
-const QUESTION_FILE = path.join(DATA_DIR, "questions.json");
+
+const DATA_DIR = path.join(
+    __dirname,
+    "..",
+    "data"
+);
+
+const QUESTION_FILE = path.join(
+    DATA_DIR,
+    "questions.json"
+);
+
+
 
 export const data = new SlashCommandBuilder()
     .setName("questioncreate")
     .setDescription("ランダムクイズ用の問題を登録します");
 
+
+
+
+// ======================
+// /questioncreate
+// ======================
 export async function execute(interaction) {
 
+
     // 管理者チェック
+
     if (
         !interaction.member.permissions.has(
             PermissionsBitField.Flags.Administrator
         )
     ) {
+
         return interaction.reply({
-            content: "❌ questioncreateは管理者のみ使用できます",
-            flags: 64
+
+            content:
+            "❌ questioncreateは管理者のみ使用できます",
+
+            flags:64
+
         });
+
     }
 
-    const modal = new ModalBuilder()
-        .setCustomId("questioncreate")
-        .setTitle("問題登録");
 
-    const input = new TextInputBuilder()
-        .setCustomId("questions")
-        .setLabel("問題を1行ずつ入力（最大10問）")
-        .setStyle(TextInputStyle.Paragraph)
+
+    const modal =
+        new ModalBuilder()
+        .setCustomId(
+            "questioncreate"
+        )
+        .setTitle(
+            "問題登録"
+        );
+
+
+
+    const input =
+        new TextInputBuilder()
+        .setCustomId(
+            "questions"
+        )
+        .setLabel(
+            "問題を1行ずつ入力（最大10問）"
+        )
+        .setStyle(
+            TextInputStyle.Paragraph
+        )
         .setPlaceholder(
 `日本の首都は？
 Discordを開発した会社は？
 1+1は？
-...
 `
         )
         .setRequired(true);
 
+
+
     modal.addComponents(
-        new ActionRowBuilder().addComponents(input)
+
+        new ActionRowBuilder()
+        .addComponents(input)
+
     );
 
-    await interaction.showModal(modal);
+
+
+    await interaction.showModal(
+        modal
+    );
+
 }
 
+
+
+
+
+// ======================
+// MODAL処理
+// ======================
 export async function handleModal(interaction) {
 
-    const text = interaction.fields.getTextInputValue("questions");
 
-    const questions = text
+    const text =
+        interaction.fields
+        .getTextInputValue(
+            "questions"
+        );
+
+
+
+    const questions =
+        text
         .split("\n")
         .map(q => q.trim())
         .filter(q => q.length > 0)
-        .slice(0, 10);
+        .slice(0,10);
 
-    if (questions.length === 0) {
+
+
+    if(
+        questions.length === 0
+    ){
+
         return interaction.reply({
-            content: "❌ 問題を入力してください。",
-            flags: 64
+
+            content:
+            "❌ 問題を入力してください。",
+
+            flags:64
+
         });
+
     }
 
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
+
+
+    // dataフォルダ作成
+
+    if(
+        !fs.existsSync(DATA_DIR)
+    ){
+
+        fs.mkdirSync(
+            DATA_DIR,
+            {
+                recursive:true
+            }
+        );
+
     }
 
-    fs.writeFileSync(
-        QUESTION_FILE,
-        JSON.stringify(questions, null, 2),
-        "utf8"
+
+
+    let data = {};
+
+
+
+    // 既存データ読み込み
+
+    if(
+        fs.existsSync(QUESTION_FILE)
+    ){
+
+        data =
+            JSON.parse(
+                fs.readFileSync(
+                    QUESTION_FILE,
+                    "utf8"
+                )
+            );
+
+    }
+
+
+
+    // サーバー初回作成
+
+    if(
+        !data[interaction.guild.id]
+    ){
+
+        data[interaction.guild.id] = [];
+
+    }
+
+
+
+    // 問題追加
+
+    data[interaction.guild.id].push(
+        ...questions
     );
 
+
+
+    // 最大100問まで保存
+
+    data[interaction.guild.id] =
+        data[interaction.guild.id]
+        .slice(0,100);
+
+
+
+    // 保存
+
+    fs.writeFileSync(
+
+        QUESTION_FILE,
+
+        JSON.stringify(
+            data,
+            null,
+            2
+        ),
+
+        "utf8"
+
+    );
+
+
+
     await interaction.reply({
-        content: `✅ ${questions.length}問保存しました。`,
-        flags: 64
+
+        content:
+        `✅ ${questions.length}問追加しました。\n現在 ${data[interaction.guild.id].length}問登録されています。`,
+
+        flags:64
+
     });
+
+
 }

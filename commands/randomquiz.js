@@ -52,46 +52,56 @@ export async function execute(interaction) {
 
     }
 
+const allQuestions =
+    JSON.parse(
+        fs.readFileSync(QUIZ_FILE,"utf8")
+    );
 
-    let questions =
-        JSON.parse(
-            fs.readFileSync(
-                QUIZ_FILE,
-                "utf8"
-            )
+let questions =
+    [
+        ...allQuestions[interaction.guild.id]
+    ];
+
+
+// 問題がない場合
+if(!questions || questions.length === 0){
+
+    return interaction.reply({
+        content:"❌ このサーバーには問題がありません",
+        flags:64
+    });
+
+}
+
+
+// 問題順シャッフル
+for(
+    let i = questions.length - 1;
+    i > 0;
+    i--
+){
+
+    const j =
+        Math.floor(
+            Math.random() * (i + 1)
         );
 
 
-    // 問題順シャッフル
-    for(
-        let i = questions.length - 1;
-        i > 0;
-        i--
-    ){
+    [
+        questions[i],
+        questions[j]
+    ] =
+    [
+        questions[j],
+        questions[i]
+    ];
 
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-
-        [
-            questions[i],
-            questions[j]
-        ] =
-        [
-            questions[j],
-            questions[i]
-        ];
-
-    }
+}
 
 
-    // 最大10問
-    questions =
-        questions.slice(0,10);
-
-
+// 最大10問
+questions =
+    questions.slice(0,10);
 
     quizSessions.set(
         interaction.user.id,
@@ -477,7 +487,7 @@ export async function handleModal(interaction){
             0x0099ff
         )
         .setTitle(
-            "🎉 クイズ結果"
+            `${interaction.member?.displayName ?? interaction.user.username}の結果`
         )
         .setDescription(
             result.slice(0,4000)
