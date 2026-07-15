@@ -725,46 +725,122 @@ client.on("interactionCreate", async (interaction) => {
     }
 
 
-
-
 // ======================
 // randomquiz BUTTON
 // ======================
+if (interaction.isButton()) {
 
-if (
-    interaction.isButton() &&
-    (
-        interaction.customId.startsWith("randomquiz_show:") ||
-        interaction.customId.startsWith("randomquiz_hide:")
-    )
-) {
 
-    const cmd = client.commands.get("randomquiz");
+    const cmd =
+        client.commands.get("randomquiz");
 
-    if (!cmd?.handleButton) return;
 
-    await cmd.handleButton(interaction);
+    if (!cmd) return;
 
-    return;
+
+
+    // 問題を見る
+
+    if (
+        interaction.customId ===
+        "randomquiz_view"
+    ) {
+
+
+        if (!cmd.showQuestionModal)
+            return;
+
+
+        await cmd.showQuestionModal(
+            interaction
+        );
+
+
+        return;
+
+    }
+
+
+
+    // 問題を見ない
+
+    if (
+        interaction.customId ===
+        "randomquiz_hide"
+    ) {
+
+
+        if (!cmd.showAnswerModal)
+            return;
+
+
+        await cmd.showAnswerModal(
+            interaction
+        );
+
+
+        return;
+
+    }
+
+
+
+    // 次の問題
+
+    if (
+        interaction.customId ===
+        "randomquiz_next"
+    ) {
+
+
+        if (!cmd.showNextQuestion)
+            return;
+
+
+        await cmd.showNextQuestion(
+            interaction
+        );
+
+
+        return;
+
+    }
+
 }
+
 
 
 // ======================
 // questioncreate MODAL
 // ======================
+
 if (
-  interaction.isModalSubmit() &&
-  interaction.customId === "questioncreate"
+    interaction.isModalSubmit() &&
+    interaction.customId === "questioncreate"
 ) {
 
-  const cmd = client.commands.get("questioncreate");
 
-  if (!cmd?.handleModal) return;
+    const cmd =
+        client.commands.get(
+            "questioncreate"
+        );
 
-  await cmd.handleModal(interaction, context);
 
-  return;
+    if (!cmd?.handleModal)
+        return;
+
+
+    await cmd.handleModal(
+        interaction,
+        context
+    );
+
+
+    return;
+
 }
+
+
 
 // ======================
 // randomquiz MODAL
@@ -773,19 +849,35 @@ if (
 if (
     interaction.isModalSubmit() &&
     (
-        interaction.customId === "randomquiz_page1" ||
-        interaction.customId === "randomquiz_page2"
+        interaction.customId ===
+        "randomquiz_question" ||
+
+        interaction.customId ===
+        "randomquiz_all_answer"
     )
 ) {
 
-    const cmd = client.commands.get("randomquiz");
 
-    if (!cmd?.handleModal) return;
+    const cmd =
+        client.commands.get(
+            "randomquiz"
+        );
 
-    await cmd.handleModal(interaction);
+
+    if (!cmd?.handleModal)
+        return;
+
+
+    await cmd.handleModal(
+        interaction
+    );
+
 
     return;
+
 }
+
+
 
     // ======================
     // iphoneaki（完全維持）
