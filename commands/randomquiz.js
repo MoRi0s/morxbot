@@ -37,7 +37,6 @@ export const data = new SlashCommandBuilder()
 
 
 
-
 // ======================
 // /randomquiz
 // ======================
@@ -47,7 +46,7 @@ export async function execute(interaction) {
     if (!fs.existsSync(QUIZ_FILE)) {
 
         return interaction.reply({
-            content:"❌ 問題データがありません",
+            content:"❌ クイズデータがありません",
             flags:64
         });
 
@@ -63,10 +62,34 @@ export async function execute(interaction) {
         );
 
 
+    // 問題順シャッフル
+    for(
+        let i = questions.length - 1;
+        i > 0;
+        i--
+    ){
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+
+        [
+            questions[i],
+            questions[j]
+        ] =
+        [
+            questions[j],
+            questions[i]
+        ];
+
+    }
+
+
+    // 最大10問
     questions =
-        questions
-        .sort(() => Math.random() - 0.5)
-        .slice(0,10);
+        questions.slice(0,10);
 
 
 
@@ -185,7 +208,7 @@ export async function showAnswerModal(interaction){
 
 
 // ======================
-// Modal作成
+// 5問入力Modal
 // ======================
 async function createQuizModal(
     interaction,
@@ -197,13 +220,14 @@ async function createQuizModal(
         session.page * 5;
 
 
+
     const modal =
         new ModalBuilder()
         .setCustomId(
             `randomquiz_answer_${session.page}`
         )
         .setTitle(
-            `クイズ ${start+1}〜${start+5}`
+            `${start + 1}〜${start + 5}問目`
         );
 
 
@@ -213,13 +237,13 @@ async function createQuizModal(
 
 
     for(
-        let i=0;
-        i<5;
+        let i = 0;
+        i < 5;
         i++
     ){
 
         const index =
-            start+i;
+            start + i;
 
 
         if(
@@ -242,16 +266,14 @@ async function createQuizModal(
             .setLabel(
                 session.show
                 ?
-                `${index+1}. ${question}`
+                `${index + 1}. ${question}`.slice(0,45)
                 :
-                `${index+1}. 回答`
+                `${index + 1}. 回答`
             )
             .setStyle(
                 TextInputStyle.Short
             )
-            .setRequired(
-                true
-            );
+            .setRequired(true);
 
 
 
@@ -271,7 +293,6 @@ async function createQuizModal(
     modal.addComponents(
         rows
     );
-
 
 
     await interaction.showModal(
@@ -306,8 +327,7 @@ export async function handleModal(interaction){
     if(!session){
 
         return interaction.reply({
-            content:
-            "❌ セッションがありません",
+            content:"❌ セッションがありません",
             flags:64
         });
 
@@ -321,13 +341,13 @@ export async function handleModal(interaction){
 
 
     for(
-        let i=0;
-        i<5;
+        let i = 0;
+        i < 5;
         i++
     ){
 
         const index =
-            start+i;
+            start + i;
 
 
         if(
@@ -355,12 +375,11 @@ export async function handleModal(interaction){
 
 
 
-    // 次のページ
+    // 次の5問
     if(
         session.page * 5 <
         session.questions.length
     ){
-
 
         const row =
             new ActionRowBuilder()
@@ -398,62 +417,58 @@ export async function handleModal(interaction){
 
 
 
+    // ======================
+    // 結果表示
+    // 問題だけシャッフル
+    // ======================
+
+    let result = "";
 
 
-const resultList = [];
-
-session.questions.forEach(
-    (q,i)=>{
-
-        resultList.push({
-            question:q,
-            answer:session.answers[i] ?? "未回答"
-        });
-
-    }
-);
-
-
-// 結果だけシャッフル
-for(
-    let i = resultList.length - 1;
-    i > 0;
-    i--
-){
-
-    const j =
-        Math.floor(
-            Math.random() * (i + 1)
-        );
-
-
-    [
-        resultList[i],
-        resultList[j]
-    ] =
-    [
-        resultList[j],
-        resultList[i]
-    ];
-
-}
+    const shuffledQuestions =
+        [
+            ...session.questions
+        ];
 
 
 
-let result = "";
+    for(
+        let i = shuffledQuestions.length - 1;
+        i > 0;
+        i--
+    ){
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
 
 
-resultList.forEach(
-    (item,i)=>{
-
-        result +=
-        `**${i+1}. ${item.question}**\n`;
-
-        result +=
-        `${item.answer}\n\n`;
+        [
+            shuffledQuestions[i],
+            shuffledQuestions[j]
+        ] =
+        [
+            shuffledQuestions[j],
+            shuffledQuestions[i]
+        ];
 
     }
-);
+
+
+
+    shuffledQuestions.forEach(
+        (q,i)=>{
+
+            result +=
+            `**Q${i+1}. ${q}**\n`;
+
+            result +=
+            `${session.answers[i] ?? "未回答"}\n\n`;
+
+        }
+    );
+
 
 
     const embed =
