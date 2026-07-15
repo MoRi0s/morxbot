@@ -153,7 +153,9 @@ questions =
 
         components:[
             row
-        ]
+        ],
+
+        flags:64
 
     });
 
