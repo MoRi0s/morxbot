@@ -6,7 +6,8 @@ import {
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
-    ActionRowBuilder
+    ActionRowBuilder,
+    PermissionsBitField
 } from "discord.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,25 +20,19 @@ export const data = new SlashCommandBuilder()
     .setName("questioncreate")
     .setDescription("ランダムクイズ用の問題を登録します");
 
-
-
-
-
-        if(
-            !interaction.member.permissions.has(
-                PermissionsBitField.Flags.Administrator
-            )
-        ){
-    
-            return interaction.reply({
-                content:"❌ questioncreateは管理者のみ使用できます",
-                flags:64
-            });
-    
-        }
-
-
 export async function execute(interaction) {
+
+    // 管理者チェック
+    if (
+        !interaction.member.permissions.has(
+            PermissionsBitField.Flags.Administrator
+        )
+    ) {
+        return interaction.reply({
+            content: "❌ questioncreateは管理者のみ使用できます",
+            flags: 64
+        });
+    }
 
     const modal = new ModalBuilder()
         .setCustomId("questioncreate")
@@ -92,6 +87,6 @@ export async function handleModal(interaction) {
 
     await interaction.reply({
         content: `✅ ${questions.length}問保存しました。`,
-        ephemeral: true
+        flags: 64
     });
 }
