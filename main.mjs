@@ -725,6 +725,29 @@ client.on("interactionCreate", async (interaction) => {
     }
 
 
+
+
+// ======================
+// randomquiz BUTTON
+// ======================
+if (
+    interaction.isButton() &&
+    (
+        interaction.customId.startsWith("randomquiz_show:") ||
+        interaction.customId.startsWith("randomquiz_hide:")
+    )
+) {
+
+    const cmd = client.commands.get("randomquiz");
+
+    if (!cmd?.handleButton) return;
+
+    await cmd.handleButton(interaction, context);
+
+    return;
+}
+
+
 // ======================
 // questioncreate MODAL
 // ======================
@@ -747,7 +770,7 @@ if (
 // ======================
 if (
   interaction.isModalSubmit() &&
-  interaction.customId === "randomquiz"
+  interaction.customId.startsWith("randomquiz:")
 ) {
 
   const cmd = client.commands.get("randomquiz");
