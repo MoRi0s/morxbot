@@ -730,6 +730,7 @@ client.on("interactionCreate", async (interaction) => {
 // ======================
 // randomquiz BUTTON
 // ======================
+
 if (
     interaction.isButton() &&
     (
@@ -742,7 +743,7 @@ if (
 
     if (!cmd?.handleButton) return;
 
-    await cmd.handleButton(interaction, context);
+    await cmd.handleButton(interaction);
 
     return;
 }
@@ -768,20 +769,23 @@ if (
 // ======================
 // randomquiz MODAL
 // ======================
+
 if (
-  interaction.isModalSubmit() &&
-  interaction.customId.startsWith("randomquiz:")
+    interaction.isModalSubmit() &&
+    (
+        interaction.customId === "randomquiz_page1" ||
+        interaction.customId === "randomquiz_page2"
+    )
 ) {
 
-  const cmd = client.commands.get("randomquiz");
+    const cmd = client.commands.get("randomquiz");
 
-  if (!cmd?.handleModal) return;
+    if (!cmd?.handleModal) return;
 
-  await cmd.handleModal(interaction, context);
+    await cmd.handleModal(interaction);
 
-  return;
+    return;
 }
-
 
     // ======================
     // iphoneaki（完全維持）
