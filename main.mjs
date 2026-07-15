@@ -785,7 +785,7 @@ if (interaction.isButton()) {
 
 
 
-    // 次の問題
+    // 次の5問
 
     if (
         interaction.customId ===
@@ -848,12 +848,8 @@ if (
 
 if (
     interaction.isModalSubmit() &&
-    (
-        interaction.customId ===
-        "randomquiz_question" ||
-
-        interaction.customId ===
-        "randomquiz_all_answer"
+    interaction.customId.startsWith(
+        "randomquiz_answer_"
     )
 ) {
 
