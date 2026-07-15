@@ -429,87 +429,127 @@ export async function handleModal(interaction){
 
 
 
-    // ======================
-    // 結果表示
-    // 問題だけシャッフル
-    // ======================
+// ======================
+// 結果表示
+// 問題と回答を別々にシャッフル
+// ======================
 
-    let result = "";
-
-
-    const shuffledQuestions =
-        [
-            ...session.questions
-        ];
+let result = "";
 
 
-
-    for(
-        let i = shuffledQuestions.length - 1;
-        i > 0;
-        i--
-    ){
-
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
+// 問題だけコピー
+const shuffledQuestions =
+    [
+        ...session.questions
+    ];
 
 
-        [
-            shuffledQuestions[i],
-            shuffledQuestions[j]
-        ] =
-        [
-            shuffledQuestions[j],
-            shuffledQuestions[i]
-        ];
-
-    }
+// 回答だけコピー
+const shuffledAnswers =
+    [
+        ...session.answers
+    ];
 
 
+// 問題シャッフル
 
-    shuffledQuestions.forEach(
-        (q,i)=>{
+for(
+    let i = shuffledQuestions.length - 1;
+    i > 0;
+    i--
+){
 
-            result +=
-            `**Q${i+1}. ${q}**\n`;
-
-            result +=
-            `${session.answers[i] ?? "未回答"}\n\n`;
-
-        }
-    );
-
-
-
-    const embed =
-        new EmbedBuilder()
-        .setColor(
-            0x0099ff
-        )
-        .setTitle(
-            `${interaction.member?.displayName ?? interaction.user.username}のランダムクイズ結果`
-        )
-        .setDescription(
-            result.slice(0,4000)
+    const j =
+        Math.floor(
+            Math.random() * (i + 1)
         );
 
 
+    [
+        shuffledQuestions[i],
+        shuffledQuestions[j]
+    ] =
+    [
+        shuffledQuestions[j],
+        shuffledQuestions[i]
+    ];
 
-    quizSessions.delete(
-        interaction.user.id
+}
+
+
+
+// 回答シャッフル
+
+for(
+    let i = shuffledAnswers.length - 1;
+    i > 0;
+    i--
+){
+
+    const j =
+        Math.floor(
+            Math.random() * (i + 1)
+        );
+
+
+    [
+        shuffledAnswers[i],
+        shuffledAnswers[j]
+    ] =
+    [
+        shuffledAnswers[j],
+        shuffledAnswers[i]
+    ];
+
+}
+
+
+
+// 表示
+
+for(
+    let i = 0;
+    i < shuffledQuestions.length;
+    i++
+){
+
+    result +=
+    `**Q${i+1}. ${shuffledQuestions[i]}**\n`;
+
+    result +=
+    `${shuffledAnswers[i] ?? "未回答"}\n\n`;
+
+}
+
+
+
+const embed =
+    new EmbedBuilder()
+    .setColor(
+        0x0099ff
+    )
+    .setTitle(
+        `${interaction.member?.displayName ?? interaction.user.username}のランダムクイズ結果`
+    )
+    .setDescription(
+        result.slice(0,4000)
     );
 
 
 
-    await interaction.reply({
+quizSessions.delete(
+    interaction.user.id
+);
 
-        embeds:[
-            embed
-        ]
 
-    });
+
+await interaction.reply({
+
+    embeds:[
+        embed
+    ]
+
+});
 
 }
 
