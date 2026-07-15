@@ -399,11 +399,6 @@ export async function handleModal(interaction){
 
 
 
-    // 結果表示
-
-    let result = "";
-
-
 
 const resultList = [];
 
