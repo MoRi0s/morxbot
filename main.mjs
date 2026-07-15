@@ -810,10 +810,11 @@ if (interaction.isButton()) {
 
 
 
+
+
 // ======================
 // questioncreate MODAL
 // ======================
-
 if (
     interaction.isModalSubmit() &&
     interaction.customId === "questioncreate"
@@ -842,10 +843,11 @@ if (
 
 
 
+
+
 // ======================
 // randomquiz MODAL
 // ======================
-
 if (
     interaction.isModalSubmit() &&
     interaction.customId.startsWith(

@@ -37,6 +37,7 @@ export const data = new SlashCommandBuilder()
 
 
 
+
 // ======================
 // /randomquiz
 // ======================
@@ -46,17 +47,24 @@ export async function execute(interaction) {
     if (!fs.existsSync(QUIZ_FILE)) {
 
         return interaction.reply({
-            content:"❌ クイズデータがありません",
+            content:"❌ 問題データがありません",
             flags:64
         });
 
     }
 
 
-    const questions =
+    let questions =
         JSON.parse(
-            fs.readFileSync(QUIZ_FILE,"utf8")
-        )
+            fs.readFileSync(
+                QUIZ_FILE,
+                "utf8"
+            )
+        );
+
+
+    questions =
+        questions
         .sort(() => Math.random() - 0.5)
         .slice(0,10);
 
@@ -79,15 +87,27 @@ export async function execute(interaction) {
         .addComponents(
 
             new ButtonBuilder()
-            .setCustomId("randomquiz_view")
-            .setLabel("問題を見る")
-            .setStyle(ButtonStyle.Primary),
+            .setCustomId(
+                "randomquiz_view"
+            )
+            .setLabel(
+                "問題を見る"
+            )
+            .setStyle(
+                ButtonStyle.Primary
+            ),
 
 
             new ButtonBuilder()
-            .setCustomId("randomquiz_hide")
-            .setLabel("問題を見ない")
-            .setStyle(ButtonStyle.Secondary)
+            .setCustomId(
+                "randomquiz_hide"
+            )
+            .setLabel(
+                "問題を見ない"
+            )
+            .setStyle(
+                ButtonStyle.Secondary
+            )
 
         );
 
@@ -98,7 +118,9 @@ export async function execute(interaction) {
         content:
         "🎲 ランダムクイズ開始\n\n問題を表示しますか？",
 
-        components:[row]
+        components:[
+            row
+        ]
 
     });
 
@@ -118,13 +140,14 @@ export async function showQuestionModal(interaction){
         );
 
 
-    if(!session) return;
+    if(!session)
+        return;
 
 
     session.show = true;
 
 
-    await createPageModal(
+    await createQuizModal(
         interaction,
         session
     );
@@ -145,13 +168,14 @@ export async function showAnswerModal(interaction){
         );
 
 
-    if(!session) return;
+    if(!session)
+        return;
 
 
     session.show = false;
 
 
-    await createPageModal(
+    await createQuizModal(
         interaction,
         session
     );
@@ -161,9 +185,9 @@ export async function showAnswerModal(interaction){
 
 
 // ======================
-// 5問入力モーダル
+// Modal作成
 // ======================
-async function createPageModal(
+async function createQuizModal(
     interaction,
     session
 ){
@@ -173,79 +197,86 @@ async function createPageModal(
         session.page * 5;
 
 
-    const end =
-        Math.min(
-            start + 5,
-            session.questions.length
-        );
-
-
     const modal =
         new ModalBuilder()
         .setCustomId(
             `randomquiz_answer_${session.page}`
         )
         .setTitle(
-            `回答 ${start+1}〜${end}`
+            `クイズ ${start+1}〜${start+5}`
         );
 
 
 
-    let label="";
+    const rows = [];
 
 
-    if(session.show){
 
-        for(
-            let i=start;
-            i<end;
-            i++
-        ){
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
 
-            label +=
-            `${i+1}. ${session.questions[i]}\n`;
+        const index =
+            start+i;
 
-        }
 
-    }else{
+        if(
+            !session.questions[index]
+        )
+            break;
 
-        label =
-        "回答を1行ずつ入力してください";
+
+
+        const question =
+            session.questions[index];
+
+
+
+        const input =
+            new TextInputBuilder()
+            .setCustomId(
+                `answer_${index}`
+            )
+            .setLabel(
+                session.show
+                ?
+                `${index+1}. ${question}`
+                :
+                `${index+1}. 回答`
+            )
+            .setStyle(
+                TextInputStyle.Short
+            )
+            .setRequired(
+                true
+            );
+
+
+
+        rows.push(
+
+            new ActionRowBuilder()
+            .addComponents(
+                input
+            )
+
+        );
 
     }
 
 
 
-    const input =
-        new TextInputBuilder()
-        .setCustomId("answers")
-        .setLabel(
-            label.slice(0,45)
-        )
-        .setStyle(
-            TextInputStyle.Paragraph
-        )
-        .setPlaceholder(
-`回答1
-回答2
-回答3
-回答4
-回答5`
-        )
-        .setRequired(true);
-
-
-
     modal.addComponents(
-
-        new ActionRowBuilder()
-        .addComponents(input)
-
+        rows
     );
 
 
 
-    await interaction.showModal(modal);
+    await interaction.showModal(
+        modal
+    );
 
 }
 
@@ -261,7 +292,8 @@ export async function handleModal(interaction){
         !interaction.customId.startsWith(
             "randomquiz_answer_"
         )
-    ) return;
+    )
+        return;
 
 
 
@@ -274,7 +306,8 @@ export async function handleModal(interaction){
     if(!session){
 
         return interaction.reply({
-            content:"❌ セッションがありません",
+            content:
+            "❌ セッションがありません",
             flags:64
         });
 
@@ -282,24 +315,47 @@ export async function handleModal(interaction){
 
 
 
-    const answers =
-        interaction.fields
-        .getTextInputValue("answers")
-        .split("\n")
-        .map(v=>v.trim());
+    const start =
+        session.page * 5;
 
 
 
-    session.answers.push(
-        ...answers
-    );
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
+
+        const index =
+            start+i;
+
+
+        if(
+            !session.questions[index]
+        )
+            break;
+
+
+
+        const answer =
+            interaction.fields
+            .getTextInputValue(
+                `answer_${index}`
+            );
+
+
+        session.answers[index] =
+            answer;
+
+    }
+
 
 
     session.page++;
 
 
 
-    // 次ページ
+    // 次のページ
     if(
         session.page * 5 <
         session.questions.length
@@ -307,53 +363,55 @@ export async function handleModal(interaction){
 
 
         const row =
-        new ActionRowBuilder()
-        .addComponents(
+            new ActionRowBuilder()
+            .addComponents(
 
-            new ButtonBuilder()
-            .setCustomId(
-                "randomquiz_next"
-            )
-            .setLabel(
-                "次の問題"
-            )
-            .setStyle(
-                ButtonStyle.Primary
-            )
+                new ButtonBuilder()
+                .setCustomId(
+                    "randomquiz_next"
+                )
+                .setLabel(
+                    "次の5問"
+                )
+                .setStyle(
+                    ButtonStyle.Primary
+                )
 
-        );
+            );
 
 
 
         return interaction.reply({
 
             content:
-            "✅ 回答保存\n次の5問へ",
+            "✅ 回答を保存しました\n次の問題へ",
 
-            components:[row],
+            components:[
+                row
+            ],
 
             flags:64
 
         });
-
 
     }
 
 
 
 
-    // 結果
+    // 結果表示
 
-    let text="";
+    let result = "";
+
 
 
     session.questions.forEach(
         (q,i)=>{
 
-            text +=
+            result +=
             `**Q${i+1}. ${q}**\n`;
 
-            text +=
+            result +=
             `${session.answers[i] ?? "未回答"}\n\n`;
 
         }
@@ -362,10 +420,16 @@ export async function handleModal(interaction){
 
 
     const embed =
-    new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle("🎉 クイズ結果")
-    .setDescription(text.slice(0,4000));
+        new EmbedBuilder()
+        .setColor(
+            0x0099ff
+        )
+        .setTitle(
+            "🎉 クイズ結果"
+        )
+        .setDescription(
+            result.slice(0,4000)
+        );
 
 
 
@@ -377,17 +441,18 @@ export async function handleModal(interaction){
 
     await interaction.reply({
 
-        embeds:[embed]
+        embeds:[
+            embed
+        ]
 
     });
-
 
 }
 
 
 
 // ======================
-// 次へボタン
+// 次へ
 // ======================
 export async function showNextQuestion(interaction){
 
@@ -398,10 +463,11 @@ export async function showNextQuestion(interaction){
         );
 
 
-    if(!session) return;
+    if(!session)
+        return;
 
 
-    await createPageModal(
+    await createQuizModal(
         interaction,
         session
     );
