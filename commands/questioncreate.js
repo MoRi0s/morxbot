@@ -19,6 +19,24 @@ export const data = new SlashCommandBuilder()
     .setName("questioncreate")
     .setDescription("ランダムクイズ用の問題を登録します");
 
+
+
+
+
+        if(
+            !interaction.member.permissions.has(
+                PermissionsBitField.Flags.Administrator
+            )
+        ){
+    
+            return interaction.reply({
+                content:"❌ questioncreateは管理者のみ使用できます",
+                flags:64
+            });
+    
+        }
+
+
 export async function execute(interaction) {
 
     const modal = new ModalBuilder()
@@ -58,7 +76,7 @@ export async function handleModal(interaction) {
     if (questions.length === 0) {
         return interaction.reply({
             content: "❌ 問題を入力してください。",
-            ephemeral: true
+            flags: 64
         });
     }
 

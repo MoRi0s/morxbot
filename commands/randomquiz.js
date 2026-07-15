@@ -17,7 +17,7 @@ const QUESTION_FILE = path.join(__dirname, "..", "data", "questions.json");
 
 export const data = new SlashCommandBuilder()
     .setName("randomquiz")
-    .setDescription("ランダムクイズを作成します");
+    .setDescription("クイズに回答します。問題は回答した後に公開されます。");
 
 export async function execute(interaction) {
 
@@ -85,7 +85,7 @@ export async function handleModal(interaction) {
 
     const embed = new EmbedBuilder()
         .setColor(0x0099ff)
-        .setTitle("🎲 ランダムクイズ")
+        .setTitle("ランダムクイズ")
         .setDescription(description);
 
     await interaction.reply({
